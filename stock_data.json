@@ -1,4 +1,4 @@
 {
     "status": "error",
-    "message": "All attempts failed"
+    "message": "Google Finance scraping failed"
 }
