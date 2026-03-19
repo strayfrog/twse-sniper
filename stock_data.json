@@ -146,9 +146,9 @@
         }
     },
     "institutional_investors": {
-        "status": "法人數據尚未更新"
+        "error": "抓取異常: Expecting value: line 1 column 1 (char 0)"
     },
     "metadata": {
-        "UpdateTime": "2026-03-19 09:27:53"
+        "UpdateTime": "2026-03-19 09:29:40"
     }
 }
