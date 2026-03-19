@@ -1,254 +1,154 @@
 {
-    "^TWII": {
-        "Name": "台股加權指數",
-        "Price": 33689.68,
-        "Category": "INDEX",
-        "Currency": "PTS",
-        "UpdateTime": "2026-03-19 09:19:16"
+    "stocks": {
+        "^TWII": {
+            "Price": 33689.68,
+            "Currency": "PTS"
+        },
+        "^GSPC": {
+            "Price": 6624.7,
+            "Currency": "PTS"
+        },
+        "^IXIC": {
+            "Price": 22152.42,
+            "Currency": "PTS"
+        },
+        "^DJI": {
+            "Price": 46225.15,
+            "Currency": "PTS"
+        },
+        "^SOX": {
+            "Price": 7795.13,
+            "Currency": "PTS"
+        },
+        "0050": {
+            "Price": 76.0,
+            "Currency": "TWD"
+        },
+        "0056": {
+            "Price": 38.88,
+            "Currency": "TWD"
+        },
+        "00713": {
+            "Price": 52.5,
+            "Currency": "TWD"
+        },
+        "00878": {
+            "Price": 22.47,
+            "Currency": "TWD"
+        },
+        "00915": {
+            "Price": 23.17,
+            "Currency": "TWD"
+        },
+        "00919": {
+            "Price": 23.0,
+            "Currency": "TWD"
+        },
+        "00939": {
+            "Price": 15.87,
+            "Currency": "TWD"
+        },
+        "00940": {
+            "Price": 9.74,
+            "Currency": "TWD"
+        },
+        "00712": {
+            "Price": 8.71,
+            "Currency": "TWD"
+        },
+        "2330": {
+            "Price": 1850.0,
+            "Currency": "TWD"
+        },
+        "2412": {
+            "Price": 135.5,
+            "Currency": "TWD"
+        },
+        "2542": {
+            "Price": 35.85,
+            "Currency": "TWD"
+        },
+        "4306": {
+            "Price": 13.4,
+            "Currency": "TWD"
+        },
+        "2801": {
+            "Price": 20.6,
+            "Currency": "TWD"
+        },
+        "2834": {
+            "Price": 15.05,
+            "Currency": "TWD"
+        },
+        "2845": {
+            "Price": 12.35,
+            "Currency": "TWD"
+        },
+        "2882": {
+            "Price": 71.6,
+            "Currency": "TWD"
+        },
+        "2883": {
+            "Price": 19.95,
+            "Currency": "TWD"
+        },
+        "2885": {
+            "Price": 44.25,
+            "Currency": "TWD"
+        },
+        "2887": {
+            "Price": 24.45,
+            "Currency": "TWD"
+        },
+        "2890": {
+            "Price": 31.7,
+            "Currency": "TWD"
+        },
+        "6005": {
+            "Price": 27.95,
+            "Currency": "TWD"
+        },
+        "6024": {
+            "Price": 55.0,
+            "Currency": "TWD"
+        },
+        "NVDA": {
+            "Price": 180.4,
+            "Currency": "USD"
+        },
+        "MU": {
+            "Price": 461.73,
+            "Currency": "USD"
+        },
+        "MUU": {
+            "Price": 233.01,
+            "Currency": "USD"
+        },
+        "UPST": {
+            "Price": 25.83,
+            "Currency": "USD"
+        },
+        "VZ": {
+            "Price": 49.59,
+            "Currency": "USD"
+        },
+        "VT": {
+            "Price": 139.82,
+            "Currency": "USD"
+        },
+        "TLT": {
+            "Price": 86.96,
+            "Currency": "USD"
+        },
+        "VOOG": {
+            "Price": 421.88,
+            "Currency": "USD"
+        }
     },
-    "^GSPC": {
-        "Name": "標普500指數",
-        "Price": 6624.7,
-        "Category": "INDEX",
-        "Currency": "PTS",
-        "UpdateTime": "2026-03-19 09:19:16"
+    "institutional_investors": {
+        "status": "法人數據尚未更新"
     },
-    "^IXIC": {
-        "Name": "那斯達克指數",
-        "Price": 22152.42,
-        "Category": "INDEX",
-        "Currency": "PTS",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "^DJI": {
-        "Name": "道瓊工業指數",
-        "Price": 46225.15,
-        "Category": "INDEX",
-        "Currency": "PTS",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "^SOX": {
-        "Name": "費城半導體指數",
-        "Price": 7795.13,
-        "Category": "INDEX",
-        "Currency": "PTS",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "0050": {
-        "Name": "元大台灣50",
-        "Price": 76.0,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "0056": {
-        "Name": "元大高股息",
-        "Price": 38.88,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "00713": {
-        "Name": "元大台灣高息低波",
-        "Price": 52.5,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:17"
-    },
-    "00878": {
-        "Name": "國泰永續高股息",
-        "Price": 22.47,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:18"
-    },
-    "00915": {
-        "Name": "凱基優選高股息",
-        "Price": 23.17,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:18"
-    },
-    "00919": {
-        "Name": "群益台灣精選高息",
-        "Price": 23.0,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:18"
-    },
-    "00939": {
-        "Name": "統一台灣高息動能",
-        "Price": 15.87,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:18"
-    },
-    "00940": {
-        "Name": "元大台灣價值高息",
-        "Price": 9.74,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:18"
-    },
-    "00712": {
-        "Name": "復華富時不動產",
-        "Price": 8.71,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:19"
-    },
-    "2330": {
-        "Name": "台積電",
-        "Price": 1850.0,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:21"
-    },
-    "2412": {
-        "Name": "中華電",
-        "Price": 135.5,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:21"
-    },
-    "2542": {
-        "Name": "興富發",
-        "Price": 35.85,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:21"
-    },
-    "4306": {
-        "Name": "炎洲",
-        "Price": 13.4,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:21"
-    },
-    "2801": {
-        "Name": "彰銀",
-        "Price": 20.6,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:21"
-    },
-    "2834": {
-        "Name": "臺企銀",
-        "Price": 15.05,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:22"
-    },
-    "2845": {
-        "Name": "遠東銀",
-        "Price": 12.35,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:22"
-    },
-    "2882": {
-        "Name": "國泰金",
-        "Price": 71.6,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:22"
-    },
-    "2883": {
-        "Name": "開發金",
-        "Price": 19.95,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:22"
-    },
-    "2885": {
-        "Name": "元大金",
-        "Price": 44.25,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:22"
-    },
-    "2887": {
-        "Name": "台新金",
-        "Price": 24.45,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:23"
-    },
-    "2890": {
-        "Name": "永豐金",
-        "Price": 31.7,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:23"
-    },
-    "6005": {
-        "Name": "群益證",
-        "Price": 27.95,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:23"
-    },
-    "6024": {
-        "Name": "群益期",
-        "Price": 55.0,
-        "Category": "EQUITY",
-        "Currency": "TWD",
-        "UpdateTime": "2026-03-19 09:19:23"
-    },
-    "NVDA": {
-        "Name": "輝達",
-        "Price": 180.4,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:23"
-    },
-    "MU": {
-        "Name": "美光",
-        "Price": 461.73,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "MUU": {
-        "Name": "兩倍做多MU",
-        "Price": 233.01,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "UPST": {
-        "Name": "Upstart",
-        "Price": 25.83,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "VZ": {
-        "Name": "威瑞森",
-        "Price": 49.59,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "VT": {
-        "Name": "全股市ETF",
-        "Price": 139.82,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "TLT": {
-        "Name": "美債20年ETF",
-        "Price": 86.96,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:24"
-    },
-    "VOOG": {
-        "Name": "標普500成長股",
-        "Price": 421.88,
-        "Category": "EQUITY",
-        "Currency": "USD",
-        "UpdateTime": "2026-03-19 09:19:25"
+    "metadata": {
+        "UpdateTime": "2026-03-19 09:23:47"
     }
 }
