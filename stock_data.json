@@ -1,30 +1,4 @@
 {
-    "0050": {
-        "Name": "元大台灣50",
-        "ClosingPrice": "77.80"
-    },
-    "0056": {
-        "Name": "元大高股息",
-        "ClosingPrice": "39.42"
-    },
-    "00713": {
-        "Name": "元大台灣高息低波",
-        "ClosingPrice": "53.00"
-    },
-    "00878": {
-        "Name": "國泰永續高股息",
-        "ClosingPrice": "22.85"
-    },
-    "00919": {
-        "Name": "群益台灣精選高息",
-        "ClosingPrice": "23.36"
-    },
-    "00929": {
-        "Name": "復華台灣科技優息",
-        "ClosingPrice": "20.15"
-    },
-    "2330": {
-        "Name": "台積電",
-        "ClosingPrice": "1905.00"
-    }
+    "status": "error",
+    "message": "All attempts failed"
 }
