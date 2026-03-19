@@ -1,11 +1,11 @@
-name: Global Assets Daily Fetch
+name: Global Assets Intelligence Fetch
 
 on:
   schedule:
-    # 🌟 設定兩個時間點 (UTC 時間)
-    # 23:00 UTC = 台灣早上 07:00 (抓取美股最終收盤)
-    # 06:00 UTC = 台灣下午 14:00 (抓取台股最終收盤)
-    - cron: '0 23,6 * * *'
+    # 07:00 (對應 UTC 23:00): 美股最終收盤數據
+    # 15:30 (對應 UTC 07:30): 台股收盤 + 三大法人籌碼數據
+    - cron: '0 23 * * *'
+    - cron: '30 7 * * *'
   workflow_dispatch:
 
 permissions:
@@ -35,6 +35,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           touch stock_data.json
           git add stock_data.json
-          # 只有在檔案真的有變動時才 Commit，避免產生無意義的紀錄
-          git diff --quiet && git diff --staged --quiet || git commit -m "🤖 自動更新全球資產報價"
+          git diff --quiet && git diff --staged --quiet || git commit -m "🤖 偵巡更新：台美股價與法人籌碼"
           git push
