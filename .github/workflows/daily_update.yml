@@ -1,4 +1,29 @@
-- name: Commit and Push (將最新報價存檔)
+name: Daily TWSE Fetch
+
+on:
+  schedule:
+    # 這裡使用的是 UTC 時間。UTC 06:00 等於台灣時間下午 14:00
+    # 設定每週一到週五的台灣時間下午 2 點自動執行
+    - cron: '0 6 * * 1-5'
+  workflow_dispatch: # 保留這個，讓您可以隨時點擊按鈕手動測試
+
+permissions:
+  contents: write # 允許機器人把新報價寫回您的專案
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run Python Script
+        run: python twse_sniper.py
+      - name: Commit and Push (將最新報價存檔)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
