@@ -1,30 +1,188 @@
 {
-    "2330": {
-        "Name": "2330.TW",
-        "ClosingPrice": 1850.0
-    },
     "0050": {
-        "Name": "0050.TW",
-        "ClosingPrice": 76.0
+        "Name": "元大台灣50",
+        "Price": 76.0,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:19"
     },
     "0056": {
-        "Name": "0056.TW",
-        "ClosingPrice": 38.88
-    },
-    "00878": {
-        "Name": "00878.TW",
-        "ClosingPrice": 22.47
-    },
-    "00919": {
-        "Name": "00919.TW",
-        "ClosingPrice": 23.0
-    },
-    "00929": {
-        "Name": "00929.TW",
-        "ClosingPrice": 19.89
+        "Name": "元大高股息",
+        "Price": 38.88,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:19"
     },
     "00713": {
-        "Name": "00713.TW",
-        "ClosingPrice": 52.5
+        "Name": "元大台灣高息低波",
+        "Price": 52.5,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:19"
+    },
+    "00878": {
+        "Name": "國泰永續高股息",
+        "Price": 22.47,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:19"
+    },
+    "00915": {
+        "Name": "凱基優選高股息",
+        "Price": 23.17,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:20"
+    },
+    "00919": {
+        "Name": "群益台灣精選高息",
+        "Price": 23.0,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:20"
+    },
+    "00939": {
+        "Name": "統一台灣高息動能",
+        "Price": 15.87,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:20"
+    },
+    "00940": {
+        "Name": "元大台灣價值高息",
+        "Price": 9.74,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:20"
+    },
+    "00712": {
+        "Name": "復華富時不動產",
+        "Price": 8.71,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:21"
+    },
+    "2330": {
+        "Name": "台積電",
+        "Price": 1850.0,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:23"
+    },
+    "2412": {
+        "Name": "中華電",
+        "Price": 135.5,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:24"
+    },
+    "2542": {
+        "Name": "興富發",
+        "Price": 35.85,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:24"
+    },
+    "4306": {
+        "Name": "炎洲",
+        "Price": 13.4,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:25"
+    },
+    "2801": {
+        "Name": "彰銀",
+        "Price": 20.6,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:25"
+    },
+    "2834": {
+        "Name": "臺企銀",
+        "Price": 15.05,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:25"
+    },
+    "2845": {
+        "Name": "遠東銀",
+        "Price": 12.35,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:26"
+    },
+    "2882": {
+        "Name": "國泰金",
+        "Price": 71.6,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:26"
+    },
+    "2883": {
+        "Name": "開發金",
+        "Price": 19.95,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:26"
+    },
+    "2885": {
+        "Name": "元大金",
+        "Price": 44.25,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:27"
+    },
+    "2887": {
+        "Name": "台新金",
+        "Price": 24.45,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:27"
+    },
+    "2890": {
+        "Name": "永豐金",
+        "Price": 31.7,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:27"
+    },
+    "6005": {
+        "Name": "群益證",
+        "Price": 27.95,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:27"
+    },
+    "6024": {
+        "Name": "群益期",
+        "Price": 55.0,
+        "Currency": "TWD",
+        "UpdateTime": "2026-03-19 09:07:28"
+    },
+    "NVDA": {
+        "Name": "輝達",
+        "Price": 180.4,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:28"
+    },
+    "MU": {
+        "Name": "美光",
+        "Price": 461.73,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:28"
+    },
+    "MUU": {
+        "Name": "兩倍做多MU",
+        "Price": 233.01,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:29"
+    },
+    "UPST": {
+        "Name": "Upstart",
+        "Price": 25.83,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:29"
+    },
+    "VZ": {
+        "Name": "威瑞森",
+        "Price": 49.59,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:29"
+    },
+    "VT": {
+        "Name": "全股市ETF",
+        "Price": 139.82,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:29"
+    },
+    "TLT": {
+        "Name": "美債20年ETF",
+        "Price": 86.96,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:30"
+    },
+    "VOOG": {
+        "Name": "標普500成長股",
+        "Price": 421.88,
+        "Currency": "USD",
+        "UpdateTime": "2026-03-19 09:07:30"
     }
 }
