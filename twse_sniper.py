@@ -1,78 +1,48 @@
 import yfinance as yf
 import json
 import time
+import requests
+import urllib3
 
-def fetch_complete_global_intelligence():
-    # 1. 指數雷達
-    indices = {
-        "^TWII": "台股加權指數",
-        "^GSPC": "標普500指數",
-        "^IXIC": "那斯達克指數",
-        "^DJI": "道瓊工業指數",
-        "^SOX": "費城半導體指數"
-    }
+# 忽略證交所 SSL 警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # 2. 根據總帥 Keep 持股清單
-    tw_assets = {
-        "0050": "元大台灣50", "0056": "元大高股息", "00713": "元大台灣高息低波", 
-        "00878": "國泰永續高股息", "00915": "凱基優選高股息", "00919": "群益台灣精選高息", 
-        "00939": "統一台灣高息動能", "00940": "元大台灣價值高息", "00858": "永豐美國500大",
-        "00712": "復華富時不動產", "00931B": "元大美債20年", "00933B": "國泰10Y+金融債", 
-        "00948B": "中信上游半導體債", "2330": "台積電", "2412": "中華電", 
-        "2542": "興富發", "4306": "炎洲", "2801": "彰銀", "2834": "臺企銀", 
-        "2845": "遠東銀", "2882": "國泰金", "2883": "開發金", "2885": "元大金", 
-        "2887": "台新金", "2890": "永豐金", "6005": "群益證", "6024": "群益期"
-    }
+def fetch_data():
+    # 標的清單
+    indices = {"^TWII": "台股加權", "^GSPC": "標普500", "^IXIC": "那斯達克", "^DJI": "道瓊", "^SOX": "費半"}
+    tw_list = ["0050", "0056", "00713", "00878", "00915", "00919", "00939", "00940", "00858", "00712", "00931B", "00933B", "00948B", "2330", "2412", "2542", "4306", "2801", "2834", "2845", "2882", "2883", "2885", "2887", "2890", "6005", "6024"]
+    us_list = ["NVDA", "MU", "MUU", "UPST", "VZ", "VT", "TLT", "VOOG"]
     
-    us_assets = {
-        "NVDA": "輝達", "MU": "美光", "MUU": "兩倍做多MU", "UPST": "Upstart", 
-        "VZ": "威瑞森", "VT": "全股市ETF", "TLT": "美債20年ETF", "VOOG": "標普500成長股"
-    }
-    
-    all_symbols = list(indices.keys()) + [f"{c}.TW" for c in tw_assets.keys()] + list(us_assets.keys())
-    
-    result = {}
-    print(f"📡 [總部連線] 正在偵巡 {len(all_symbols)} 檔目標...")
-    
+    symbols = list(indices.keys()) + [f"{c}.TW" for c in tw_list] + us_list
+    result = {"stocks": {}, "institutional_investors": {}, "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}}
+
+    # A. 抓取股價
+    tickers = yf.Tickers(" ".join(symbols))
+    for sym in symbols:
+        try:
+            price = tickers.tickers[sym].fast_info['last_price']
+            clean_code = sym.replace(".TW", "")
+            result["stocks"][clean_code] = {
+                "Price": round(price, 2), 
+                "Currency": "USD" if clean_code in us_list else ("PTS" if clean_code in indices else "TWD")
+            }
+        except: continue
+
+    # B. 抓取台股三大法人買賣超總計
     try:
-        tickers = yf.Tickers(" ".join(all_symbols))
-        
-        for sym in all_symbols:
-            try:
-                ticker = tickers.tickers[sym]
-                price = ticker.fast_info['last_price']
-                
-                if price:
-                    clean_code = sym.replace(".TW", "")
-                    name = indices.get(clean_code) or tw_assets.get(clean_code) or us_assets.get(clean_code)
-                    
-                    # 修正語法邏輯，確保不再噴錯
-                    if sym in indices:
-                        category = "INDEX"
-                        currency = "PTS"
-                    elif ".TW" in sym:
-                        category = "EQUITY"
-                        currency = "TWD"
-                    else:
-                        category = "EQUITY"
-                        currency = "USD"
-
-                    result[clean_code] = {
-                        "Name": name,
-                        "Price": round(price, 2),
-                        "Category": category,
-                        "Currency": currency,
-                        "UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    }
-            except:
-                continue
-
-    except Exception as e:
-        result = {"status": "error", "message": str(e)}
+        resp = requests.get("https://openapi.twse.com.tw/v1/fund/BFI82U", verify=False, timeout=15)
+        if resp.status_code == 200:
+            for item in resp.json():
+                name = item['單位名稱']
+                diff_str = item['買賣差額'].replace(",", "")
+                diff = int(diff_str)
+                result["institutional_investors"][name] = f"{round(diff/100000000, 2)} 億"
+    except:
+        result["institutional_investors"]["status"] = "法人數據尚未更新"
 
     with open('stock_data.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
-    print("✅ 情報站數據已全面更新。")
+    print("🏁 全球情報站數據已更新。")
 
 if __name__ == "__main__":
-    fetch_complete_global_intelligence()
+    fetch_data()
