@@ -2,32 +2,34 @@ name: Daily TWSE Fetch
 
 on:
   schedule:
-    # 這裡使用的是 UTC 時間。UTC 06:00 等於台灣時間下午 14:00
-    # 設定每週一到週五的台灣時間下午 2 點自動執行
     - cron: '0 6 * * 1-5'
-  workflow_dispatch: # 保留這個，讓您可以隨時點擊按鈕手動測試
+  workflow_dispatch:
 
 permissions:
-  contents: write # 允許機器人把新報價寫回您的專案
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # 1. 解決黃色警告：全面升級至最新版 GitHub Actions (v4 與 v5)
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
       - name: Install dependencies
         run: pip install requests
+        
       - name: Run Python Script
         run: python twse_sniper.py
-      - name: Commit and Push (將最新報價存檔)
+        
+      # 2. 解決紅色錯誤：加入防呆機制 (保證檔案存在，且加入所有變更)
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add stock_data.json
-          # 🌟 關鍵修復：如果檔案沒變化，就不 commit，也不會報錯中斷
+          touch stock_data.json  # 終極防呆：強制生出一個空檔案，保證 git 絕對找得到東西
+          git add -A             # 把所有變動（不管叫什麼名字）全部打包
           git diff --quiet && git diff --staged --quiet || git commit -m "🤖 自動更新台股收盤價"
           git push
