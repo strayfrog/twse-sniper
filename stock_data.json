@@ -1,4 +1,30 @@
 {
-    "status": "error",
-    "message": "Google Finance scraping failed"
+    "2330": {
+        "Name": "2330.TW",
+        "ClosingPrice": 1850.0
+    },
+    "0050": {
+        "Name": "0050.TW",
+        "ClosingPrice": 76.0
+    },
+    "0056": {
+        "Name": "0056.TW",
+        "ClosingPrice": 38.88
+    },
+    "00878": {
+        "Name": "00878.TW",
+        "ClosingPrice": 22.47
+    },
+    "00919": {
+        "Name": "00919.TW",
+        "ClosingPrice": 23.0
+    },
+    "00929": {
+        "Name": "00929.TW",
+        "ClosingPrice": 19.89
+    },
+    "00713": {
+        "Name": "00713.TW",
+        "ClosingPrice": 52.5
+    }
 }
