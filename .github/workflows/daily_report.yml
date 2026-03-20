@@ -1,0 +1,29 @@
+name: Strategic Report Automation
+
+on:
+  push:
+    paths:
+      - 'stock_data.json' # 當數據更新時自動觸發
+  workflow_dispatch:      # 允許手動從 GitHub 介面執行
+
+jobs:
+  analyze_and_report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install google-generativeai requests
+
+      - name: Run Strategic Analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python report_generator.py
