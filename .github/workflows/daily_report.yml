@@ -1,6 +1,11 @@
 name: Strategic Report Automation
 
 on:
+  schedule:
+    # 台灣時間 08:00 (UTC 00:00)
+    - cron: '0 0 * * *'
+    # 台灣時間 16:00 (UTC 08:00)
+    - cron: '0 8 * * *'
   push:
     paths:
       - 'stock_data.json'
@@ -9,7 +14,6 @@ on:
 jobs:
   analyze_and_report:
     runs-on: ubuntu-latest
-    # 【關鍵修正】授權 GitHub Actions 寫入權限，否則無法 Push 報告
     permissions:
       contents: write
       
@@ -32,10 +36,8 @@ jobs:
         run: python report_generator.py
 
       - name: Commit and Push Report
-        # 這個步驟會把產生的 latest_report.md 存回 GitHub
         run: |
           git config --global user.name "Strategic-Bot"
           git config --global user.email "bot@github.com"
           git add latest_report.md
-          # 檢查是否有變更，若無則跳過，避免報錯
           git diff --quiet && git diff --staged --quiet || (git commit -m "📡 Update Latest Strategic Report" && git push)
