@@ -12,7 +12,8 @@ genai.configure(api_key=GEMINI_KEY)
 def send_discord_notify(message):
     payload = {"content": message}
     try:
-        requests.post(DISCORD_URL, json=payload, timeout=10)
+        r = requests.post(DISCORD_URL, json=payload, timeout=10)
+        print(f"Discord 回傳狀態: {r.status_code}")
     except Exception as e:
         print(f"發送失敗: {e}")
 
@@ -23,17 +24,24 @@ def generate_report():
         return
 
     with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+        raw_data = json.load(f)
 
-    # 【鐵律 2】判斷休市 - 修正為對齊您的 JSON 欄位 "update_time"
-    if not data or "update_time" not in data:
-        print("今日數據格式不符或未更新，無需報告。")
+    # 【手術式結構修正】判斷是 List 還是 Dict 並提取 update_time
+    if isinstance(raw_data, list) and len(raw_data) > 0:
+        target_data = raw_data[0] # 取第一筆資料作為主數據
+    else:
+        target_data = raw_data
+
+    # 【鐵律 2】判斷數據效力
+    update_time = target_data.get("update_time", "未知時間")
+    if not target_data or "stock_id" not in target_data:
+        print("今日數據不全，無需報告。")
         return
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
-    * 美股游擊 (VOOG)：三月預算 $3000。戰術：大盤下殺見綠時，手動點射 1 股。
-    * 美股防守 (MU / MUU)：2026/2027 產能滿載邏輯不變，續抱。
+    * 美股游擊 (VOOG)：三月預算 $3000。大盤下殺見綠時，手動點射 1 股。
+    * 美股防守 (MU / MUU)：產能滿載邏輯不變，網子與多單續抱。
     * 美股鑽石手 (NVDA)：獲利保護中，死抱不放。
     * 台股階梯防禦 (0050)：動用 25.4 萬。
     """
@@ -43,7 +51,7 @@ def generate_report():
     prompt = f"""
     你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
     
-    【當前數據】: {json.dumps(data, ensure_ascii=False)}
+    【當前數據】: {json.dumps(raw_data, ensure_ascii=False)}
     【戰略防線】: {defense_line}
     
     【⚠️ 最高軍規鐵律】:
@@ -56,7 +64,7 @@ def generate_report():
         response = model.generate_content(prompt)
         report_text = response.text
         # --- 3. 發送戰報 ---
-        full_message = f"📡 **【總帥盤後戰報 - {data['update_time']}】**\n{report_text}"
+        full_message = f"📡 **【總帥盤後戰報 - {update_time}】**\n{report_text}"
         send_discord_notify(full_message)
     except Exception as e:
         print(f"AI 分析失敗: {e}")
