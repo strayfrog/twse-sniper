@@ -10,7 +10,7 @@ def fetch_data():
     # 標的清單
     indices = {"^TWII": "台股加權", "^GSPC": "標普500", "^IXIC": "那斯達克", "^DJI": "道瓊", "^SOX": "費半"}
     tw_list = ["0050", "0056", "00713", "00878", "00915", "00919", "00939", "00940", "00858", "00712", "00931B", "00933B", "00948B", "2330", "2412", "2542", "4306", "2801", "2834", "2845", "2882", "2883", "2885", "2887", "2890", "6005", "6024"]
-    us_list = ["NVDA", "MU", "MUU", "UPST", "VZ", "VT", "TLT", "VOOG"]
+    us_list = ["NVDA", "MU", "MUU", "UPST", "VZ", "VT", "TLT", "VOO", "VOOG"]
     
     symbols = list(indices.keys()) + [f"{c}.TW" for c in tw_list] + us_list
     result = {"stocks": {}, "institutional_investors": {}, "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}}
