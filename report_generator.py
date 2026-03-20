@@ -1,0 +1,68 @@
+import os
+import json
+import requests
+import google.generativeai as genai
+from datetime import datetime
+
+# --- 1. 安全初始化 ---
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
+genai.configure(api_key=GEMINI_KEY)
+
+def send_discord_notify(message):
+    payload = {"content": message}
+    try:
+        requests.post(DISCORD_URL, json=payload, timeout=10)
+    except Exception as e:
+        print(f"發送失敗: {e}")
+
+def generate_report():
+    # 【檔案唯一標準】讀取最新數據
+    file_path = 'stock_data.json'
+    if not os.path.exists(file_path):
+        print("找不到 stock_data.json，可能是休市或尚未抓取。")
+        return
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+
+    # 【鐵律 2】判斷休市
+    if not data or "UpdateTime" not in data:
+        print("今日休市，無需報告。")
+        return
+
+    # 【🛡️ 總帥 2026 全球資產戰略防線】(後台靜默對比)
+    defense_line = """
+    * 美股游擊 (VOOG)：三月預算 $3000。戰術：大盤下殺見綠時，手動點射 1 股，買跌不買漲。
+    * 美股防守 (MU / MUU)：2026/2027 產能滿載邏輯不變，網子與多單無腦續抱。
+    * 美股鑽石手 (NVDA)：獲利保護中，死抱不放。
+    * 美股後勤 (VOO)：每月 $1500 豐存股持續自動扣款。
+    * 台股階梯防禦 (0050)：動用 25.4 萬。
+    """
+
+    # --- 2. 執行 AI 戰略分析 ---
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    prompt = f"""
+    你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
+    
+    【當前數據】: {json.dumps(data)}
+    【戰略防線】: {defense_line}
+    
+    【⚠️ 最高軍規鐵律】:
+    1. 100% 基於 JSON 數據，禁止腦補。
+    2. 嚴禁印出確切持股數量與成本價。
+    3. 若數據顯示符合「戰略防線」的買入/賣出條件，請明確指出。
+    4. 語氣：專業、冷酷、精確。
+    """
+    
+    try:
+        response = model.generate_content(prompt)
+        report_text = response.text
+        # --- 3. 發送戰報 ---
+        full_message = f"📡 **【總帥盤後戰報 - {datetime.now().strftime('%Y-%m-%d')}】**\n{report_text}"
+        send_discord_notify(full_message)
+    except Exception as e:
+        print(f"AI 分析失敗: {e}")
+
+if __name__ == "__main__":
+    generate_report()
