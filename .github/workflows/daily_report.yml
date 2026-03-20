@@ -2,8 +2,13 @@ name: Strategic Dual-Track Automation
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 台灣 08:00 跑美股
-    - cron: '0 8 * * *' # 台灣 16:00 跑台股
+    # 台灣 07:55 (UTC 23:55，前一天)
+    - cron: '55 23 * * *'
+    # 台灣 15:55 (UTC 07:55)
+    - cron: '55 7 * * *'
+  push:
+    paths:
+      - 'stock_data.json'
   workflow_dispatch:
 
 jobs:
@@ -23,15 +28,13 @@ jobs:
       - name: Install Dependencies
         run: pip install requests
 
-      - name: Run US Report (Morning)
-        if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
+      - name: Run US Report
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: python report_us.py
 
-      - name: Run TW Report (Afternoon)
-        if: github.event.schedule == '0 8 * * *' || github.event_name == 'workflow_dispatch'
+      - name: Run TW Report
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -42,5 +45,5 @@ jobs:
           git config --global user.name "Strategic-Bot"
           git config --global user.email "bot@github.com"
           git add report_us.md report_tw.md || true
-          git commit -m "📡 Update Tactical Reports" || exit 0
+          git commit -m "📡 Update Tactical Reports (Pre-scheduled)" || exit 0
           git push
