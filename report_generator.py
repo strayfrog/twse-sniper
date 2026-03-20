@@ -1,13 +1,15 @@
 import os
 import json
 import requests
-import google.generativeai as genai
+from google import genai
 from datetime import datetime
 
 # --- 1. 安全初始化 ---
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
-genai.configure(api_key=GEMINI_KEY)
+
+# 使用最新 SDK 客戶端
+client = genai.Client(api_key=GEMINI_KEY)
 
 def send_discord_notify(message):
     payload = {"content": message}
@@ -24,20 +26,13 @@ def generate_report():
         return
 
     with open(file_path, 'r', encoding='utf-8') as f:
-        try:
-            raw_data = json.load(f)
-        except:
-            print("JSON 格式損壞")
-            return
+        raw_data = json.load(f)
 
     if not raw_data:
         print("今日數據完全空白")
         return
 
-    # 取得更新時間
     update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
-    if isinstance(raw_data, list) and len(raw_data) > 0:
-        update_time = raw_data[0].get("update_time", update_time)
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
@@ -48,22 +43,23 @@ def generate_report():
     """
 
     # --- 2. 執行 AI 戰略分析 ---
-    # 【手術式修正】切換至相容性最高的模型名稱
     try:
-        model = genai.GenerativeModel('gemini-pro') 
+        # 最新 SDK 呼叫方式
         prompt = f"""
         你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
-        
-        【當前數據】: {json.dumps(raw_data, ensure_ascii=False)}
-        【戰略防線】: {defense_line}
+        數據內容: {json.dumps(raw_data, ensure_ascii=False)}
+        戰略防線: {defense_line}
         
         【⚠️ 最高軍規鐵律】:
         1. 100% 基於 JSON 數據，禁止腦補。
-        2. 若無價格數據請告知數據未更新。
-        3. 語氣：專業、冷酷、精確。
+        2. 語氣：專業、冷酷、精確。
         """
         
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash", 
+            contents=prompt
+        )
+        
         report_text = response.text
         
         # --- 3. 發送戰報 ---
