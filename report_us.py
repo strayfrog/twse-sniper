@@ -1,34 +1,18 @@
-import os, json, requests
-from datetime import datetime, timedelta
-
-GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
-
-def generate_report():
-    with open('stock_data.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
+prompt = f"""
+    你是總帥的美股首席戰略官。禁止廢話，直接進入「硬核戰報」。
     
-    tw_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
+    【情報數據】: {json.dumps(data, ensure_ascii=False)}
+    【戰略防線】: 
+    - VOOG：標普500成長股。戰術：大盤見綠(下跌)時手動點射 1 股。
+    - MU/NVDA：半導體核心。戰術：獲利保護，死抱不放，無視短期震盪。
     
-    # 鎖定美股標的分析
-    prompt = f"""
-    你是總帥的美股戰略官。禁止廢話。
-    數據: {json.dumps(data, ensure_ascii=False)}
-    防線: VOOG見綠點射、MU/NVDA續抱。
+    【報告結構要求】:
+    1. 📡 **美股戰情總結**: 用一句話定調昨日美股盤勢（如：多頭反攻、空頭壓制、高檔震盪）。
+    2. 📊 **標的深度透視**: 針對 VOOG, MU, NVDA，列出價格並計算與前日/防線的相對關係。
+    3. ⚔️ **今日行動指令**: 
+       - 判斷今日開盤是否為「點射時刻」？
+       - 針對 NVDA 與 MU 的持倉給出心理建設。
+    4. 💡 **風險警告**: 提醒今日可能影響美股的宏觀數據或趨勢。
     
-    任務:
-    1. 僅提取美股標的價格。
-    2. 判斷昨日收盤是否符合「下殺點射」時機。
-    3. 給出今日開盤前的具體行動指令。
-    4. 結尾：報告完畢，請總帥下令。
+    語氣：專業、精確、冷酷。禁止使用「您可以」、「建議您」等軟弱字眼，改用「指令」、「執行」、「埋伏」。
     """
-    
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
-    response = requests.post(api_url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
-    report = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-    
-    full_msg = f"🇺🇸 **【美股晨間戰報 - {tw_time}】**\n{report}"
-    requests.post(DISCORD_URL, json={"content": full_msg})
-    with open("report_us.md", "w", encoding="utf-8") as f: f.write(full_msg)
-
-if __name__ == "__main__": generate_report()
