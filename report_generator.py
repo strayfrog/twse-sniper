@@ -8,8 +8,8 @@ from datetime import datetime
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
-# 【核心修正 1】強制指定使用 v1 穩定版 API，避開 v1beta 坑洞
-client = genai.Client(api_key=GEMINI_KEY, http_options={'api_version': 'v1'})
+# 使用最簡化的客戶端宣告
+client = genai.Client(api_key=GEMINI_KEY)
 
 def send_discord_notify(message):
     payload = {"content": message}
@@ -25,26 +25,33 @@ def generate_report():
         print("找不到 stock_data.json")
         return
 
-    with open(file_path, 'r', encoding='utf-8') as f:
-        raw_data = json.load(f)
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            raw_data = json.load(f)
+    except Exception as e:
+        print(f"讀取 JSON 失敗: {e}")
+        return
 
     update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
-    * 美股游擊 (VOOG)：三月預算 $3000。下殺見綠時點射。
-    * 美股防守 (MU / MUU)：續抱無視震盪。
-    * 美股鑽石手 (NVDA)：獲利保護，死抱不放。
-    * 台股階梯防禦 (0050)：動用 25.4 萬。
+    * 美股游擊 (VOOG)：下殺見綠時點射。
+    * 美股防守 (MU / MUU)：續抱。
+    * 美股鑽石手 (NVDA)：死抱不放。
+    * 台股階梯防禦 (0050)：25.4 萬防線。
     """
 
     # --- 2. 執行 AI 戰略分析 ---
     try:
-        prompt = f"你是總帥首席戰略官。請根據數據產出戰報：{json.dumps(raw_data, ensure_ascii=False)}\n戰略防線：{defense_line}"
+        # 【核心修正】強制使用最簡短的 ID，不加任何前綴
+        model_id = "gemini-1.5-flash" 
         
-        # 【核心修正 2】直接使用最簡潔的模型名稱
+        prompt = f"你是總帥首席戰略官。請根據數據產出精簡戰報：{json.dumps(raw_data, ensure_ascii=False)}\n戰略防線：{defense_line}"
+        
+        # 移除 contents 以外的所有參數，確保相容性
         response = client.models.generate_content(
-            model="gemini-1.5-flash", 
+            model=model_id,
             contents=prompt
         )
         
@@ -53,7 +60,8 @@ def generate_report():
         send_discord_notify(full_message)
         
     except Exception as e:
-        print(f"AI 分析失敗: {str(e)}")
+        # 印出完整的錯誤詳細資訊，如果是 404，我們會看到它到底在找哪個路徑
+        print(f"AI 分析失敗詳情: {str(e)}")
 
 if __name__ == "__main__":
     generate_report()
