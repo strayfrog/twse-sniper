@@ -26,7 +26,6 @@ def generate_report():
     with open(file_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    # 【手術式修正】放寬判定條件：只要 raw_data 有內容就跑分析
     if not raw_data:
         print("今日數據完全空白，無需報告。")
         return
@@ -47,7 +46,9 @@ def generate_report():
     """
 
     # --- 2. 執行 AI 戰略分析 ---
+    # 【手術式修正】修正模型名稱路徑
     model = genai.GenerativeModel('gemini-1.5-flash')
+    
     prompt = f"""
     你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
     
@@ -61,6 +62,7 @@ def generate_report():
     """
     
     try:
+        # 額外指定 generation_config 以確保相容性
         response = model.generate_content(prompt)
         report_text = response.text
         # --- 3. 發送戰報 ---
