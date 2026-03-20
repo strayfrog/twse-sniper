@@ -27,9 +27,9 @@ def generate_report():
     update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
     defense_line = "VOOG 買跌不買漲、MU/NVDA 續抱、0050 25.4萬階梯防禦。"
 
-    # --- 2. 執行 AI 戰略分析 (降級相容版本) ---
-    # 【關鍵修正】模型名稱改為最通用的 gemini-pro
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_KEY}"
+    # --- 2. 執行 AI 戰略分析 (手術式精準 URL) ---
+    # 【最核心修正】2026 穩定版路徑：v1beta/models/gemini-1.5-flash
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
     
     headers = {'Content-Type': 'application/json'}
     prompt = f"你是總帥首席戰略官。根據數據產出精簡戰報：{json.dumps(raw_data, ensure_ascii=False)}\n戰略防線：{defense_line}"
@@ -47,11 +47,11 @@ def generate_report():
             full_message = f"📡 **【總帥盤後戰報 - {update_time}】**\n{report_text}"
             send_discord_notify(full_message)
         else:
-            # 如果還是失敗，我們會看到 Google 給的具體錯誤原因
-            print(f"API 拒絕請求。錯誤訊息: {json.dumps(result)}")
+            # 這是最後的診斷輸出
+            print(f"API 回應異常。完整 JSON: {json.dumps(result)}")
             
     except Exception as e:
-        print(f"通訊失敗: {str(e)}")
+        print(f"通訊崩潰: {str(e)}")
 
 if __name__ == "__main__":
     generate_report()
