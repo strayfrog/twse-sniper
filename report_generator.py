@@ -24,52 +24,54 @@ def generate_report():
         return
 
     with open(file_path, 'r', encoding='utf-8') as f:
-        raw_data = json.load(f)
+        try:
+            raw_data = json.load(f)
+        except:
+            print("JSON 格式損壞")
+            return
 
     if not raw_data:
-        print("今日數據完全空白，無需報告。")
+        print("今日數據完全空白")
         return
 
     # 取得更新時間
-    update_time = "未知時間"
+    update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
     if isinstance(raw_data, list) and len(raw_data) > 0:
-        update_time = raw_data[0].get("update_time", datetime.now().strftime('%Y-%m-%d'))
-    elif isinstance(raw_data, dict):
-        update_time = raw_data.get("update_time", datetime.now().strftime('%Y-%m-%d'))
+        update_time = raw_data[0].get("update_time", update_time)
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
     * 美股游擊 (VOOG)：三月預算 $3000。戰術：大盤下殺見綠時，手動點射 1 股。
-    * 美股防守 (MU / MUU)：產能滿載邏輯不變，續抱。
-    * 美股鑽石手 (NVDA)：獲利保護中，死抱不放。
+    * 美股防守 (MU / MUU)：續抱無視震盪。
+    * 美股鑽石手 (NVDA)：獲利保護，死抱不放。
     * 台股階梯防禦 (0050)：動用 25.4 萬。
     """
 
     # --- 2. 執行 AI 戰略分析 ---
-    # 【手術式修正】修正模型名稱路徑
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    prompt = f"""
-    你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
-    
-    【當前數據】: {json.dumps(raw_data, ensure_ascii=False)}
-    【戰略防線】: {defense_line}
-    
-    【⚠️ 最高軍規鐵律】:
-    1. 100% 基於 JSON 數據。若數據中無特定股票價格，請提醒總帥數據未更新。
-    2. 嚴禁印出確切持股數量與成本價。
-    3. 語氣：專業、冷酷、精確。
-    """
-    
+    # 【手術式修正】切換至相容性最高的模型名稱
     try:
-        # 額外指定 generation_config 以確保相容性
+        model = genai.GenerativeModel('gemini-pro') 
+        prompt = f"""
+        你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
+        
+        【當前數據】: {json.dumps(raw_data, ensure_ascii=False)}
+        【戰略防線】: {defense_line}
+        
+        【⚠️ 最高軍規鐵律】:
+        1. 100% 基於 JSON 數據，禁止腦補。
+        2. 若無價格數據請告知數據未更新。
+        3. 語氣：專業、冷酷、精確。
+        """
+        
         response = model.generate_content(prompt)
         report_text = response.text
+        
         # --- 3. 發送戰報 ---
         full_message = f"📡 **【總帥盤後戰報 - {update_time}】**\n{report_text}"
         send_discord_notify(full_message)
+        
     except Exception as e:
-        print(f"AI 分析失敗: {e}")
+        print(f"AI 分析失敗: {str(e)}")
 
 if __name__ == "__main__":
     generate_report()
