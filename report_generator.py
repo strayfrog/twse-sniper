@@ -11,7 +11,7 @@ def send_discord_notify(message):
     payload = {"content": message}
     try:
         r = requests.post(DISCORD_URL, json=payload, timeout=10)
-        print(f"Discord 回傳狀態: {r.status_code}")
+        print(f"Discord 發送狀態: {r.status_code}")
     except Exception as e:
         print(f"發送失敗: {e}")
 
@@ -24,34 +24,20 @@ def generate_report():
     with open(file_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
-    defense_line = "VOOG 買跌不買漲、MU/NVDA 續抱、0050 25.4萬階梯防禦。"
-
-    # --- 2. 執行 AI 戰略分析 (手術式精準 URL) ---
-    # 【最核心修正】2026 穩定版路徑：v1beta/models/gemini-1.5-flash
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_KEY}"
-    
-    headers = {'Content-Type': 'application/json'}
-    prompt = f"你是總帥首席戰略官。根據數據產出精簡戰報：{json.dumps(raw_data, ensure_ascii=False)}\n戰略防線：{defense_line}"
-    
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}]
-    }
-    
+    # --- 2. 核心診斷：要求模型列表 ---
+    list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={GEMINI_KEY}"
     try:
-        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
-        result = response.json()
-        
-        if "candidates" in result:
-            report_text = result["candidates"][0]["content"]["parts"][0]["text"]
-            full_message = f"📡 **【總帥盤後戰報 - {update_time}】**\n{report_text}"
-            send_discord_notify(full_message)
-        else:
-            # 這是最後的診斷輸出
-            print(f"API 回應異常。完整 JSON: {json.dumps(result)}")
-            
-    except Exception as e:
-        print(f"通訊崩潰: {str(e)}")
+        models_resp = requests.get(list_url)
+        print("--- 可用模型列表診斷 ---")
+        print(models_resp.text[:500]) # 印出前 500 字看可用型號
+    except:
+        print("無法取得模型列表")
+
+    # --- 3. 強制發送測試 (跳過 AI) ---
+    update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
+    test_msg = f"📡 **【系統診斷訊息 - {update_time}】**\n目前 AI 連線受阻，正在強制發送數據：\n{json.dumps(raw_data, ensure_ascii=False)}"
+    
+    send_discord_notify(test_msg)
 
 if __name__ == "__main__":
     generate_report()
