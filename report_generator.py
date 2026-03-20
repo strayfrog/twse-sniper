@@ -26,13 +26,17 @@ def generate_report():
     with open(file_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    # 【手術式修正】對齊您的 JSON 欄位：code, name, close, update_time
-    if isinstance(raw_data, list) and len(raw_data) > 0:
-        # 只要列表裡有資料，我們就視為有效數據
-        update_time = raw_data[0].get("update_time", datetime.now().strftime('%Y-%m-%d'))
-    else:
-        print("今日數據不全，無需報告。")
+    # 【手術式修正】放寬判定條件：只要 raw_data 有內容就跑分析
+    if not raw_data:
+        print("今日數據完全空白，無需報告。")
         return
+
+    # 取得更新時間
+    update_time = "未知時間"
+    if isinstance(raw_data, list) and len(raw_data) > 0:
+        update_time = raw_data[0].get("update_time", datetime.now().strftime('%Y-%m-%d'))
+    elif isinstance(raw_data, dict):
+        update_time = raw_data.get("update_time", datetime.now().strftime('%Y-%m-%d'))
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
@@ -51,10 +55,9 @@ def generate_report():
     【戰略防線】: {defense_line}
     
     【⚠️ 最高軍規鐵律】:
-    1. 100% 基於 JSON 數據，禁止腦補。
+    1. 100% 基於 JSON 數據。若數據中無特定股票價格，請提醒總帥數據未更新。
     2. 嚴禁印出確切持股數量與成本價。
-    3. 針對 0050 等標的給出具體建議。
-    4. 語氣：專業、冷酷、精確。
+    3. 語氣：專業、冷酷、精確。
     """
     
     try:
