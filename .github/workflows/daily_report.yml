@@ -1,22 +1,16 @@
-name: Strategic Report Automation
+name: Strategic Dual-Track Automation
 
 on:
   schedule:
-    # 台灣時間 08:00 (UTC 00:00)
-    - cron: '0 0 * * *'
-    # 台灣時間 16:00 (UTC 08:00)
-    - cron: '0 8 * * *'
-  push:
-    paths:
-      - 'stock_data.json'
+    - cron: '0 0 * * *' # 台灣 08:00 跑美股
+    - cron: '0 8 * * *' # 台灣 16:00 跑台股
   workflow_dispatch:
 
 jobs:
-  analyze_and_report:
+  strategic_reporting:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -29,15 +23,24 @@ jobs:
       - name: Install Dependencies
         run: pip install requests
 
-      - name: Run Strategic Analysis
+      - name: Run US Report (Morning)
+        if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python report_generator.py
+        run: python report_us.py
 
-      - name: Commit and Push Report
+      - name: Run TW Report (Afternoon)
+        if: github.event.schedule == '0 8 * * *' || github.event_name == 'workflow_dispatch'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python report_tw.py
+
+      - name: Sync Reports to Repo
         run: |
           git config --global user.name "Strategic-Bot"
           git config --global user.email "bot@github.com"
-          git add latest_report.md
-          git diff --quiet && git diff --staged --quiet || (git commit -m "📡 Update Latest Strategic Report" && git push)
+          git add report_us.md report_tw.md || true
+          git commit -m "📡 Update Tactical Reports" || exit 0
+          git push
