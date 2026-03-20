@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 6606.49,
+            "Price": 6506.48,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 22090.69,
+            "Price": 21647.61,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 46021.43,
+            "Price": 45577.47,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 7863.3,
+            "Price": 7670.61,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,47 +113,47 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 178.56,
+            "Price": 172.7,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 444.27,
+            "Price": 422.9,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 215.03,
+            "Price": 194.34,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 26.77,
+            "Price": 25.98,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 49.48,
+            "Price": 49.98,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 139.55,
+            "Price": 136.32,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 87.49,
+            "Price": 85.83,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 420.26,
+            "Price": 411.99,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "-31.32 億",
         "自營商(避險)": "-69.73 億",
-        "投信": "12.77 億",
-        "外資及陸資(不含外資自營商)": "-399.86 億",
+        "投信": "10.58 億",
+        "外資及陸資(不含外資自營商)": "-403.11 億",
         "外資自營商": "0.0 億",
-        "合計": "-488.13 億"
+        "合計": "-493.58 億"
     },
     "metadata": {
-        "UpdateTime": "2026-03-20 07:59:55"
+        "UpdateTime": "2026-03-20 23:35:03"
     }
 }
