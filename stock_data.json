@@ -140,6 +140,10 @@
             "Price": 87.49,
             "Currency": "USD"
         },
+        "VOO": {
+            "Price": 606.75,
+            "Currency": "USD"
+        },
         "VOOG": {
             "Price": 420.26,
             "Currency": "USD"
@@ -154,6 +158,6 @@
         "合計": "-1024.27 億"
     },
     "metadata": {
-        "UpdateTime": "2026-03-19 23:36:04"
+        "UpdateTime": "2026-03-20 00:36:58"
     }
 }
