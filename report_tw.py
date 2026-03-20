@@ -1,34 +1,49 @@
 import os, json, requests
 from datetime import datetime, timedelta
 
+# --- 初始化 ---
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 def generate_report():
+    if not os.path.exists('stock_data.json'): return
     with open('stock_data.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     tw_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
     
-    # 鎖定台股與法人分析
+    # 【核心升級：法人與防線深度解碼】
     prompt = f"""
-    你是總帥的台股戰略官。禁止廢話。
-    數據: {json.dumps(data, ensure_ascii=False)}
-    防線: 0050 25.4萬階梯防禦。
+    你是總帥的台股戰略副官。禁止開場白，直接進行「法人與防線深度解碼」。
     
-    任務:
-    1. 分析 0050 價格與「25.4 萬」防線的距離。
-    2. 深度解讀「三大法人買賣超」力道。
-    3. 給出明日開盤前的防禦或進攻建議。
-    4. 結尾：報告完畢，請總帥下令。
+    【情報數據】: {json.dumps(data, ensure_ascii=False)}
+    【核心防線】: 0050 於 25.4 萬台幣水位建立階梯防禦。
+    
+    【戰報結構要求】:
+    1. 🇹🇼 **台股盤勢掃描**: 簡評今日台股大盤走勢與量能氣氛。
+    2. 🕵️ **法人動向偵查**: 
+       - 深度解讀「外資、投信、自營商」的買賣超具體數字與力道。
+       - 分析法人的集體行為是「撤退」、「撤資」還是「暗中佈局」。
+    3. 🛡️ **防線沙盤推演**: 
+       - 根據 0050 現價，精確計算距離「25.4 萬」防線還有多少百分比空間？
+       - 若法人大賣，分析防線是否面臨威脅？
+    4. ⚔️ **明日預判行動**: 給出明日開盤前的具體戰略部署建議。
+    
+    語氣：冷峻、嚴肅、數據導向。內容要飽滿，必須提到具體的買賣超數字。
     """
     
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
-    response = requests.post(api_url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
-    report = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-    
-    full_msg = f"🇹🇼 **【台股盤後法人戰報 - {tw_time}】**\n{report}"
-    requests.post(DISCORD_URL, json={"content": full_msg})
-    with open("report_tw.md", "w", encoding="utf-8") as f: f.write(full_msg)
+    try:
+        response = requests.post(api_url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
+        report = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        
+        full_msg = f"🇹🇼 **【台股盤後法人戰報 - {tw_time}】**\n{report}"
+        # 分段發送確保不截斷
+        for i in range(0, len(full_msg), 1900):
+            requests.post(DISCORD_URL, json={"content": full_msg[i:i+1900]})
+            
+        with open("report_tw.md", "w", encoding="utf-8") as f: f.write(full_msg)
+    except Exception as e:
+        print(f"台股分析失敗: {e}")
 
 if __name__ == "__main__": generate_report()
