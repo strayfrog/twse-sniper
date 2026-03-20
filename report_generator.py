@@ -44,7 +44,6 @@ def generate_report():
 
     # --- 2. 執行 AI 戰略分析 ---
     try:
-        # 最新 SDK 呼叫方式
         prompt = f"""
         你是總帥的首席戰略官。請根據以下數據產出精準、無廢話的「盤後戰報」。
         數據內容: {json.dumps(raw_data, ensure_ascii=False)}
@@ -55,6 +54,7 @@ def generate_report():
         2. 語氣：專業、冷酷、精確。
         """
         
+        # 【核心修正】拿掉 models/ 前綴，直接使用模型 ID
         response = client.models.generate_content(
             model="gemini-1.5-flash", 
             contents=prompt
@@ -67,6 +67,7 @@ def generate_report():
         send_discord_notify(full_message)
         
     except Exception as e:
+        # 增加詳細錯誤輸出，方便最後排錯
         print(f"AI 分析失敗: {str(e)}")
 
 if __name__ == "__main__":
