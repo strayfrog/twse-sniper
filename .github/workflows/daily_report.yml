@@ -3,8 +3,8 @@ name: Strategic Report Automation
 on:
   push:
     paths:
-      - 'stock_data.json' # 當數據更新時自動觸發
-  workflow_dispatch:      # 允許手動從 GitHub 介面執行
+      - 'stock_data.json'
+  workflow_dispatch:
 
 jobs:
   analyze_and_report:
@@ -14,13 +14,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4 # 修正為官方正確名稱
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11' 
+          python-version: '3.10'
 
       - name: Install Dependencies
-        run: |
-          pip install google-genai requests
+        run: pip install requests # 只需要這個，最穩定
 
       - name: Run Strategic Analysis
         env:
