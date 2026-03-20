@@ -26,22 +26,18 @@ def generate_report():
     with open(file_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    # 【手術式結構修正】判斷是 List 還是 Dict 並提取 update_time
+    # 【手術式修正】對齊您的 JSON 欄位：code, name, close, update_time
     if isinstance(raw_data, list) and len(raw_data) > 0:
-        target_data = raw_data[0] # 取第一筆資料作為主數據
+        # 只要列表裡有資料，我們就視為有效數據
+        update_time = raw_data[0].get("update_time", datetime.now().strftime('%Y-%m-%d'))
     else:
-        target_data = raw_data
-
-    # 【鐵律 2】判斷數據效力
-    update_time = target_data.get("update_time", "未知時間")
-    if not target_data or "stock_id" not in target_data:
         print("今日數據不全，無需報告。")
         return
 
     # 【🛡️ 總帥 2026 全球資產戰略防線】
     defense_line = """
-    * 美股游擊 (VOOG)：三月預算 $3000。大盤下殺見綠時，手動點射 1 股。
-    * 美股防守 (MU / MUU)：產能滿載邏輯不變，網子與多單續抱。
+    * 美股游擊 (VOOG)：三月預算 $3000。戰術：大盤下殺見綠時，手動點射 1 股。
+    * 美股防守 (MU / MUU)：產能滿載邏輯不變，續抱。
     * 美股鑽石手 (NVDA)：獲利保護中，死抱不放。
     * 台股階梯防禦 (0050)：動用 25.4 萬。
     """
@@ -57,8 +53,8 @@ def generate_report():
     【⚠️ 最高軍規鐵律】:
     1. 100% 基於 JSON 數據，禁止腦補。
     2. 嚴禁印出確切持股數量與成本價。
-    3. 行動導向：請特別比對 0050 的當前價格與「階梯防禦 (25.4 萬)」的可用資金，給出具體加碼或觀望建議。
-    4. 語氣：專業、冷酷、精確，使用 Markdown 表格或列點呈現。
+    3. 針對 0050 等標的給出具體建議。
+    4. 語氣：專業、冷酷、精確。
     """
     
     try:
