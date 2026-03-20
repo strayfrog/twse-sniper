@@ -8,14 +8,10 @@ GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
 def send_discord_notify(message):
-    # Discord Webhook 單次發送上限為 2000 字元，我們截斷確保安全
-    safe_message = message[:1950] 
-    payload = {"content": safe_message}
+    payload = {"content": message}
     try:
         r = requests.post(DISCORD_URL, json=payload, timeout=10)
         print(f"Discord 發送狀態: {r.status_code}")
-        if r.status_code != 204:
-            print(f"Discord 回傳錯誤詳情: {r.text}")
     except Exception as e:
         print(f"發送失敗: {e}")
 
@@ -29,20 +25,39 @@ def generate_report():
         raw_data = json.load(f)
 
     update_time = datetime.now().strftime('%Y-%m-%d %H:%M')
-    defense_line = "VOOG 下殺點射、MU/NVDA 續抱、0050 25.4萬防禦。"
+    
+    # 【🛡️ 總帥 2026 全球資產戰略防線】
+    defense_line = """
+    * 美股游擊 (VOOG)：下殺見綠時點射。
+    * 美股防守 (MU / MUU)：續抱，無視震盪。
+    * 美股鑽石手 (NVDA)：獲利保護，死抱不放。
+    * 台股階梯防禦 (0050)：25.4 萬防線，每跌 1% 考慮動用部分資金。
+    """
 
-    # --- 2. 執行 AI 戰略分析 (2026 最新模型) ---
+    # --- 2. 執行 AI 戰略分析 (強化 Prompt 版) ---
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
     
     headers = {'Content-Type': 'application/json'}
-    # 限制 AI 輸出的長度與格式
-    prompt = f"你是總帥首席戰略官。請根據數據產出精簡戰報，限 500 字內，使用簡單條列式即可：{json.dumps(raw_data, ensure_ascii=False)}\n戰略防線：{defense_line}"
+    
+    # 【核心升級：深度分析指令】
+    prompt = f"""
+    你是總帥的首席軍事戰略官，請針對以下數據進行「硬核分析」：
+    
+    【當前情報】: {json.dumps(raw_data, ensure_ascii=False)}
+    【戰略防線】: {defense_line}
+    
+    【⚠️ 戰報格式要求】:
+    1. 📡 **戰情總結**: 一句話評論今日大盤氣氛。
+    2. 📊 **數據透視**: 針對 JSON 內的標的，列出價格變化並評註。
+    3. ⚔️ **行動建議**: 結合「戰略防線」，具體建議現在該「點射」、「死抱」還是「動用防禦資金」。
+    4. 語氣：精確、冷酷、充滿軍事威嚴。禁止廢話。
+    """
     
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
-            "maxOutputTokens": 800,
-            "temperature": 0.7
+            "maxOutputTokens": 1000,
+            "temperature": 0.8  # 略微調高創造性，讓分析更有見地
         }
     }
     
@@ -52,8 +67,7 @@ def generate_report():
         
         if "candidates" in result:
             report_text = result["candidates"][0]["content"]["parts"][0]["text"]
-            # 加上明顯的標題
-            full_message = f"📡 **【總帥盤後戰報 - {update_time}】**\n{report_text}"
+            full_message = f"📡 **【總帥盤後硬核戰報 - {update_time}】**\n{report_text}"
             send_discord_notify(full_message)
         else:
             print(f"AI 異常: {json.dumps(result)}")
