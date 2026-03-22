@@ -113,11 +113,11 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 172.7,
+            "Price": 172.93,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 422.9,
+            "Price": 422.88,
             "Currency": "USD"
         },
         "MUU": {
@@ -154,6 +154,6 @@
         "合計": "-493.58 億"
     },
     "metadata": {
-        "UpdateTime": "2026-03-22 07:53:41"
+        "UpdateTime": "2026-03-22 23:34:23"
     }
 }
