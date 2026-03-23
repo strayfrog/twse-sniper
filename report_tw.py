@@ -1,52 +1,68 @@
-import google.generativeai as genai
 import os
 import json
+import google.generativeai as genai
 
 def generate_analysis(data):
-    """
-    使用 Gemini 1.5 Flash 分析台股數據
-    """
-    api_key = os.getenv("GEMINI_API_KEY")
+    # 抓取 GitHub Secrets 傳進來的 API KEY
+    api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        return "錯誤: 找不到 GEMINI_API_KEY 環境變數"
-
+        return "❌ 錯誤：找不到 GOOGLE_API_KEY 環境變數，無法通訊。"
+    
     genai.configure(api_key=api_key)
     
-    # 設定安全性過濾器，避免財經數據分析被誤判攔截
-    safety_settings = [
-        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-    ]
-
-    model = genai.GenerativeModel(
-        model_name='gemini-1.5-flash',
-        safety_settings=safety_settings
-    )
+    # 呼叫 Gemini 模型
+    model = genai.GenerativeModel('gemini-1.5-pro') 
     
+    # 總監戰略 Prompt
     prompt = f"""
-    你是一位專業的台股分析師。請根據以下 JSON 格式的股票數據（包含技術指標、法人籌碼與盤後資訊），
-    提供一份精簡且專業的中文分析報告。
-    報告必須包含：
-    1. 整體盤勢總結。
-    2. 值得關注的強勢個股與原因。
-    3. 潛在風險提示。
-    
-    數據內容：
-    {json.dumps(data, ensure_ascii=False, indent=2)}
-    """
+    你現在是「首席財富策略總監」。請根據以下的 JSON 盤後數據，產出今日的【台股盤後戰略報告】。
+    請嚴格遵守台灣繁體中文術語規範（如：資訊、法人、盤後、籌碼）。
 
+    報告必須包含以下五大結構，並使用 Markdown 格式排版：
+    ### I. 現金流與緊急預備金分析
+    ### II. 目標量化時程表
+    ### III. 投資組合策略表格
+    ### IV. 保障規劃優化
+    ### V. 下一步行動清單
+
+    以下是今日市場與三大法人籌碼數據：
+    ```json
+    {json.dumps(data, ensure_ascii=False, indent=2)}
+    ```
+    """
+    
     try:
         response = model.generate_content(prompt)
-        # 檢查是否有正常回傳內容
-        if response and response.text:
-            return response.text
-        else:
-            return "Gemini 回傳了空結果，可能是內容觸發了過濾機制。"
+        return response.text
     except Exception as e:
-        return f"台股分析執行失敗: {str(e)}"
+        return f"❌ AI 分析失敗：{e}"
 
 if __name__ == "__main__":
-    # 測試程式邏輯用
-    pass
+    json_path = "stock_data.json"
+    
+    # 1. 檢查 JSON 是否存在
+    if not os.path.exists(json_path):
+        print(f"❌ 找不到數據檔 {json_path}，無法產出戰報。")
+        exit(1)
+        
+    # 2. 讀取 JSON
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        
+    print("🧠 正在呼叫 Gemini 總部進行台股戰略分析...")
+    
+    # 3. 產出分析內容
+    report_content = generate_analysis(data)
+    
+    # 4. 寫入 Markdown 檔案
+    if "❌" not in report_content:
+        report_path = "report_tw.md"
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("# 🇹🇼 每日台股盤後戰略報告\n\n")
+            f.write(f"**數據更新時間：** {data.get('metadata', {}).get('UpdateTime', '未知')}\n\n")
+            f.write("---\n\n")
+            f.write(report_content)
+        print(f"✅ 台股戰報產出成功！已儲存至 {report_path}")
+    else:
+        print(report_content)
+        exit(1)
