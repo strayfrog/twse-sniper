@@ -31,7 +31,7 @@ def generate_analysis(data):
     try:
         # 新版呼叫語法
         response = client.models.generate_content(
-            model='gemini-1.5-pro',
+            model='gemini-1.5-flash',
             contents=prompt
         )
         return response.text
