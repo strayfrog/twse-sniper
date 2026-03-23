@@ -2,8 +2,8 @@ name: Global Tactical Intelligence (Data & Report)
 
 on:
   schedule:
-    - cron: '30 7 * * *'    # 台灣 15:30 (台股)
-    - cron: '30 0 * * 2-6'  # 台灣 08:30 (美股週二至週六)
+    - cron: '30 7 * * 1-5'    # 台北 15:30 (台股週一至週五)
+    - cron: '30 0 * * 2-6'    # 台北 08:30 (美股週二至週六)
   workflow_dispatch:
 
 jobs:
@@ -20,54 +20,52 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip' # 啟用快取機制，提升戰備速度
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib google-generativeai pandas
+          # 確保所有通訊與分析模組正確安裝到當前 Python 環境
+          python -m pip install requests yfinance beautifulsoup4 pandas lxml \
+            google-api-python-client google-auth-httplib2 google-auth-oauthlib \
+            google-generativeai
 
       - name: 📈 第一階段：偵蒐開盤狀態與執行腳本
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # 關鍵修正：將 GEMINI_API_KEY 映射為腳本所需的 GOOGLE_API_KEY
+          GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           python - <<EOF
           import requests
           from datetime import datetime
           import os
+          import sys
 
-          # 1. 取得今日西元日期 YYYYMMDD
           today_str = datetime.now().strftime('%Y%m%d')
           print(f"--- 戰前偵蒐開始 (今日: {today_str}) ---")
 
-          # 2. 串接證交所 OpenAPI 檢查休市
+          # 1. 偵蒐台股是否休市
           try:
-              # 您提供的 OpenAPI 連結：有價證券集中交易市場開（休）市日期
-              resp = requests.get("https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule")
+              resp = requests.get("https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule", timeout=10)
               holidays = resp.json()
-              
-              # 檢查今天是否在休市清單 (API 中的 Date 欄位為西元 8 碼)
               is_holiday = any(h.get('Date') == today_str for h in holidays)
               
               if is_holiday:
                   reason = [h.get('Name') for h in holidays if h.get('Date') == today_str][0]
                   print(f"🛑 證交所公告今日休市 ({reason})，停止作戰。")
-                  exit(0)
-              
-              # 週末額外保險
-              if datetime.now().weekday() >= 5:
-                  print("🛑 今日為週末，市場不開門，停止作戰。")
-                  exit(0)
-
-              print("✅ 偵蒐完成：今日為交易日，準備開火！")
+                  # 如果是美股時段 (08:30)，即便台股休市也應繼續執行美股部分
+                  # 這裡暫不強行 exit，改由腳本內部判斷或繼續執行
           except Exception as e:
-              print(f"⚠️ 證交所 API 連線異常 ({e})，改採基本週末判斷。")
-              if datetime.now().weekday() >= 5: exit(0)
+              print(f"⚠️ 偵蒐異常 ({e})，改採基本週末判斷。")
 
-          # 3. 執行核心作戰腳本
-          os.system("python twse_sniper.py")
-          os.system("python report_us.py")
-          os.system("python report_tw.py")
+          # 2. 執行核心作戰腳本 (使用 sys.executable 確保環境一致性)
+          print("🚀 執行核心分析...")
+          exit_code = os.system(f"{sys.executable} twse_sniper.py")
+          
+          if exit_code != 0:
+              print(f"❌ 腳本執行崩潰，代碼: {exit_code}")
+              sys.exit(1)
           EOF
 
       - name: 📡 同步至 GitHub 陣地
@@ -87,10 +85,9 @@ jobs:
         env:
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
-          OWNER_EMAIL: "zzzz555tw@gmail.com"
         run: |
           python - <<EOF
-          import os, json
+          import os, json, sys
           from google.oauth2 import service_account
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
@@ -114,12 +111,12 @@ jobs:
 
                       media = MediaFileUpload(file_name, resumable=True)
                       if items:
-                          # 執行覆蓋更新 (這不會扣服務帳戶那 0GB 的 Quota)
                           file_id = items[0]['id']
                           drive_service.files().update(fileId=file_id, media_body=media).execute()
                           print(f"✅ 雲端更新成功: {file_name}")
                       else:
-                          print(f"❌ 錯誤: 雲端找不到佔位檔 {file_name}，請手動上傳一次。")
+                          print(f"❌ 錯誤: 雲端找不到佔位檔 {file_name}")
           except Exception as e:
               print(f"❌ 雲端同步失敗: {e}")
+              sys.exit(1)
           EOF
