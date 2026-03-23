@@ -7,7 +7,6 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def fetch_data():
-    # 1. 定義標的 (確保所有代碼都在清單中)
     indices_list = ["^TWII", "^GSPC", "^IXIC", "^SOX"]
     us_stocks = ["NVDA", "MU", "UPST", "VZ", "VT", "TLT", "VOOG"]
     tw_targets = [
@@ -18,58 +17,52 @@ def fetch_data():
     
     result = {"stocks": {}, "institutional_investors": {}, "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}}
 
-    # A. 證交所多重資料庫偵蒐
-    print("📡 啟動證交所 OpenAPI 多維度偵蒐...")
+    # A. 證交所全方位火網 (改用 MI_INDEX 收盤行情，這是最準的)
+    print("📡 啟動證交所全方位偵蒐...")
     tw_price_map = {}
     
-    # 準備三個不同分類的官方抽屜
-    api_sources = [
-        "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL", # 一般區
-        "https://openapi.twse.com.tw/v1/exchangeReport/BW0648",        # 債券/權證區
-        "https://openapi.twse.com.tw/v1/quotation/L_OPEN_DATA"         # 行情匯總區
-    ]
-    
-    for url in api_sources:
-        try:
-            resp = requests.get(url, timeout=20)
-            if resp.status_code == 200:
-                data = resp.json()
-                for item in data:
-                    # 統一欄位名稱判定 (證交所欄位名會變)
-                    code = item.get('Code') or item.get('SecuritiesCode') or item.get('證券代號')
-                    price = item.get('ClosingPrice') or item.get('收盤價') or item.get('最後揭示價')
-                    if code and price and price not in ['-', '0.00', '']:
-                        tw_price_map[code] = str(price).replace(",", "")
-        except: continue
+    # 這裡直接呼叫證交所的每日收盤行情大表 (包含 ETF)
+    # 00858, 00931B 等都會在這裡
+    try:
+        # 加上隨機參數避免快取
+        url = f"https://www.twse.com.tw/exchangeReport/MI_INDEX?response=json&type=ALL&_={int(time.time())}"
+        resp = requests.get(url, timeout=20)
+        if resp.status_code == 200:
+            data = resp.json()
+            # 遍歷資料表，找出符合我們代碼的價格
+            # 證交所的 json 格式較複雜，通常在 data9 或 data8
+            for key in data.keys():
+                if isinstance(data[key], list):
+                    for row in data[key]:
+                        if len(row) > 8 and row[0] in tw_targets:
+                            # row[0] 是代號, row[8] 是收盤價
+                            tw_price_map[row[0]] = row[8]
+    except Exception as e:
+        print(f"⚠️ 證交所主表抓取異常: {e}")
 
-    # B. 逐一比對標的，若 API 沒抓到，改衝 Yahoo
+    # B. 判斷是否有漏網之魚，有的話用備援 API
     for code in tw_targets:
         price = tw_price_map.get(code)
-        if price:
-            try:
-                result["stocks"][code] = {"Price": float(price), "Currency": "TWD"}
-                print(f"✅ [TWSE] 抓取成功: {code} -> {price}")
-            except: pass
+        if price and price not in ['-', '0.00', '']:
+            result["stocks"][code] = {"Price": float(str(price).replace(",", "")), "Currency": "TWD"}
+            print(f"✅ [TWSE] 抓取成功: {code} -> {price}")
         else:
-            print(f"⚠️ [TWSE] 找不到 {code}，切換 Yahoo 備援...")
+            # 最後的備援：強攻即時行情 API
             try:
-                # 嘗試 00931B.TW 或 00858.TW
-                ticker_name = f"{code}.TW"
-                ticker = yf.Ticker(ticker_name)
-                # 先試 fast_info，不行就 history
-                p = ticker.fast_info['last_price']
-                if p is None or p <= 0:
-                    hist = ticker.history(period="1d")
-                    if not hist.empty: p = hist['Close'].iloc[-1]
-                
-                if p:
-                    result["stocks"][code] = {"Price": round(float(p), 2), "Currency": "TWD"}
-                    print(f"✅ [Yahoo] 抓取成功: {code} -> {p}")
+                backup_url = f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_{code}.tw&_={int(time.time())}"
+                b_resp = requests.get(backup_url, timeout=10)
+                b_data = b_resp.json()
+                # z 是最新成交價, y 是昨日收盤
+                p = b_data['msgArray'][0].get('z') or b_data['msgArray'][0].get('y')
+                if p and p != '-':
+                    result["stocks"][code] = {"Price": float(p), "Currency": "TWD"}
+                    print(f"✅ [MIS] 補送成功: {code} -> {p}")
                 else:
-                    print(f"❌ [FAIL] {code} 徹底失蹤")
-            except: pass
+                    print(f"❌ [FAIL] {code} 依舊無法定位")
+            except:
+                print(f"❌ [FAIL] {code} 徹底失蹤")
 
-    # C. Yahoo Finance 獲取指數與美股
+    # C. Yahoo Finance 獲取美股與指數
     print("📡 正在同步美股與指數...")
     for sym in indices_list + us_stocks:
         try:
@@ -80,7 +73,7 @@ def fetch_data():
                 result["stocks"][name] = {"Price": round(float(p), 2), "Currency": "USD" if sym in us_stocks else "PTS"}
         except: pass
 
-    # D. 法人籌碼 (維持原本穩定路徑)
+    # D. 法人籌碼
     try:
         f_resp = requests.get("https://www.twse.com.tw/fund/BFI82U?response=json", verify=False, timeout=20)
         f_data = f_resp.json()
@@ -88,7 +81,6 @@ def fetch_data():
             result["institutional_investors"][row[0]] = f"{round(float(row[3].replace(',', '')) / 100000000, 2)} 億"
     except: pass
 
-    # 存檔
     with open('stock_data.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
     print("✅ 全球資產戰報數據更新成功。")
