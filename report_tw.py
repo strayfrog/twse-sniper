@@ -11,7 +11,7 @@ def generate_analysis(data):
     genai.configure(api_key=api_key)
     
     # 呼叫 Gemini 模型
-    model = genai.GenerativeModel('gemini-1.5-pro') 
+    model = genai.GenerativeModel('gemini-1.5-pro-latest')
     
     # 總監戰略 Prompt
     prompt = f"""
