@@ -2,8 +2,8 @@ name: Global Tactical Intelligence (Data & Report)
 
 on:
   schedule:
-    - cron: '30 7 * * *'
-    - cron: '30 0 * * 2-6'
+    - cron: '30 7 * * *'    # 台灣 15:30 (台股)
+    - cron: '30 0 * * 2-6'  # 台灣 08:30 (美股)
   workflow_dispatch:
 
 jobs:
@@ -26,14 +26,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-      - name: 📈 執行數據更新與報告產出
+      - name: 📈 第一階段：執行數據更新與報告產出
+        id: run_script
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          python twse_sniper.py
-          python report_us.py
-          python report_tw.py
+          python - <<EOF
+          import requests
+          from datetime import datetime
+          import os
+
+          # 1. 判斷是否為週末 (0-4 是週一到週五)
+          today = datetime.now().weekday()
+          if today >= 5:
+              print("今天是週末，休市不執行。")
+              exit(0) 
+
+          # 2. 執行您的核心腳本
+          os.system("python twse_sniper.py")
+          os.system("python report_us.py")
+          os.system("python report_tw.py")
+          EOF
 
       - name: 📡 同步至 GitHub 陣地
         run: |
@@ -41,14 +55,14 @@ jobs:
           git config --global user.email "bot@github.com"
           git add stock_data.json report_us.md report_tw.md
           if git diff --staged --quiet; then
-            echo "No changes"
+            echo "沒有變動需要 Commit"
           else
             git commit -m "🤖 偵巡更新：數據與報告同步"
             git pull --rebase origin main
             git push origin main
           fi
 
-      - name: 🚀 雲端空投 (終極權限轉移版)
+      - name: 🚀 第二階段：雲端空投 (更新 Google Drive)
         env:
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
@@ -60,42 +74,32 @@ jobs:
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
 
+          # 只有在檔案存在的情況下才執行上傳 (避免休市沒產出檔案時報錯)
+          files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
+          if not any(os.path.exists(f) for f in files_to_upload):
+              print("今日無新戰報產出，跳過上傳。")
+              exit(0)
+
           try:
               creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
               creds = service_account.Credentials.from_service_account_info(creds_json)
               drive_service = build('drive', 'v3', credentials=creds)
-
-              files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
               folder_id = os.environ['FOLDER_ID']
-              owner_email = os.environ['OWNER_EMAIL']
 
               for file_name in files_to_upload:
-                  if not os.path.exists(file_name):
-                      continue
-                  
-                  media = MediaFileUpload(file_name, resumable=True)
-                  query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
-                  results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
-                  items = results.get('files', [])
+                  if os.path.exists(file_name):
+                      query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+                      results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+                      items = results.get('files', [])
 
-                  if items:
-                      file_id = items[0]['id']
-                      drive_service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
-                      print(f"✅ 已更新: {file_name}")
-                  else:
-                      file_metadata = {'name': file_name, 'parents': [folder_id]}
-                      # 建立檔案時若報空間不足，此段會報錯，但我們在下一步會試圖轉移所有權
-                      file = drive_service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
-                      file_id = file.get('id')
-                      
-                      # 強制轉移所有權給總帥，讓空間扣在總帥頭上
-                      permission = {'type': 'user', 'role': 'owner', 'emailAddress': owner_email}
-                      drive_service.permissions().create(fileId=file_id, body=permission, transferOwnership=True, supportsAllDrives=True).execute()
-                      print(f"🚀 已上傳並轉移權限: {file_name}")
-
+                      media = MediaFileUpload(file_name, resumable=True)
+                      if items:
+                          # 檔案已存在，執行覆蓋更新 (這不會扣機器人的 Quota)
+                          file_id = items[0]['id']
+                          drive_service.files().update(fileId=file_id, media_body=media).execute()
+                          print(f"✅ 已更新雲端檔案: {file_name}")
+                      else:
+                          print(f"⚠️ 找不到雲端檔案 {file_name}，請確保您已手動上傳佔位檔。")
           except Exception as e:
-              print(f"❌ 錯誤: {e}")
-              if "storageQuotaExceeded" in str(e):
-                  print("⚠️ 空間依然不足。請手動上傳一次空的 report_tw.md 到該資料夾，之後更新就不會扣 Quota 了。")
-              exit(1)
+              print(f"❌ 雲端同步失敗: {e}")
           EOF
