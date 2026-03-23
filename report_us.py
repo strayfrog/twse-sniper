@@ -35,17 +35,18 @@ def generate_report():
     """
     
     api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
-    try:
-        response = requests.post(api_url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
-        report = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-        
-        full_msg = f"🇺🇸 **【美股晨間硬核戰報 - {tw_time}】**\n{report}"
-        # 分段發送確保不截斷
-        for i in range(0, len(full_msg), 1900):
-            requests.post(DISCORD_URL, json={"content": full_msg[i:i+1900]})
-            
-        with open("report_us.md", "w", encoding="utf-8") as f: f.write(full_msg)
-    except Exception as e:
-        print(f"美股分析失敗: {e}")
+   # --- 起始關鍵字：report = response.json() ---
+try:
+    res_data = response.json()
+    if "candidates" in res_data and len(res_data["candidates"]) > 0:
+        report = res_data["candidates"][0]["content"]["parts"][0]["text"]
+    else:
+        # 這裡會捕捉到 API 拒絕回答的情況，並紀錄原因
+        error_msg = res_data.get("feedback", "未知 API 過濾錯誤")
+        report = f"⚠️ 總部拒絕下令：API 未回傳分析內容。原因：{error_msg}"
+        print(f"DEBUG: API Response Error: {res_data}")
+except (KeyError, IndexError, Exception) as e:
+    report = f"❌ 戰訊解讀崩潰：解析 JSON 時發生錯誤 {str(e)}"
+# --- 結束關鍵字：(下一行寫入檔案的邏輯) ---
 
 if __name__ == "__main__": generate_report()
