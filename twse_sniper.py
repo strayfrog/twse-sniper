@@ -1,79 +1,61 @@
+
 import yfinance as yf
 import json
-import os
-from datetime import datetime
-import report_us
-import report_tw
+import time
+import requests
+import urllib3
 
-def get_stock_data(symbol):
-    """
-    抓取個股數據，若遇 404 或無數據則自動跳過。
-    """
-    try:
-        stock = yf.Ticker(symbol)
-        df = stock.history(period="5d")
-        
-        if df.empty or len(df) < 2:
-            print(f"⚠️ 標的 {symbol} 數據異常，已跳過。")
-            return None
-            
-        current_price = df['Close'].iloc[-1]
-        prev_price = df['Close'].iloc[-2]
-        change_pct = ((current_price / prev_price) - 1) * 100
-        
-        return {
-            "symbol": symbol,
-            "price": round(current_price, 2),
-            "change": f"{round(change_pct, 2)}%",
-            "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-    except Exception as e:
-        print(f"❌ 抓取 {symbol} 失敗: {str(e)}")
-        return None
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def save_to_json(data, filename="stock.json"):
-    """
-    確保數據優先寫入。
-    """
+def fetch_data():
+    # 標的清單
+    indices = {"^TWII": "台股加權", "^GSPC": "標普500", "^IXIC": "那斯達克", "^DJI": "道瓊", "^SOX": "費半"}
+    tw_list = ["0050", "0056", "00713", "00878", "00915", "00919", "00939", "00940", "00858", "00712", "00931B", "00933B", "00948B", "2330", "2412", "2542", "4306", "2801", "2834", "2845", "2882", "2883", "2885", "2887", "2890", "6005", "6024"]
+    us_list = ["NVDA", "MU", "MUU", "UPST", "VZ", "VT", "TLT", "VOOG"]
+    
+    symbols = list(indices.keys()) + [f"{c}.TW" for c in tw_list] + us_list
+    result = {"stocks": {}, "institutional_investors": {}, "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}}
+
+    # A. 抓取股價
+    print("📡 正在同步台美股價...")
+    tickers = yf.Tickers(" ".join(symbols))
+    for sym in symbols:
+        try:
+            price = tickers.tickers[sym].fast_info['last_price']
+            clean_code = sym.replace(".TW", "")
+            result["stocks"][clean_code] = {
+                "Price": round(price, 2), 
+                "Currency": "USD" if clean_code in us_list else ("PTS" if clean_code in indices else "TWD")
+            }
+        except: continue
+
+    # B. 三大法人 (切換為穩定路徑 + 偽裝標頭)
+    print("📡 正在強制突擊法人籌碼...")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     try:
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        print(f"✅ 數據已寫入 {filename}")
+        # 改用這個節點，資料格式最穩定
+        url = "https://www.twse.com.tw/fund/BFI82U?response=json"
+        resp = requests.get(url, headers=headers, verify=False, timeout=20)
+        
+        if resp.status_code == 200:
+            data = resp.json()
+            # 格式解析：data['data'] 是一個列表，每一項是 [單位名稱, 買進, 賣出, 差額]
+            if 'data' in data:
+                for row in data['data']:
+                    name = row[0]
+                    diff_str = row[3].replace(",", "")
+                    billion = round(float(diff_str) / 100000000, 2)
+                    result["institutional_investors"][name] = f"{billion} 億"
+            else:
+                result["institutional_investors"]["status"] = "證交所尚未開牌"
+        else:
+            result["institutional_investors"]["status"] = f"連線受阻 (Code: {resp.status_code})"
     except Exception as e:
-        print(f"❌ JSON 儲存失敗: {e}")
+        result["institutional_investors"]["status"] = f"偵巡異常: {str(e)}"
+
+    with open('stock_data.json', 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=4)
+    print("✅ 全球資產戰報數據更新成功。")
 
 if __name__ == "__main__":
-    # 建議在此移除 00858.TW 等無效標的
-    target_stocks = ["AAPL", "NVDA", "TSLA", "2330.TW", "0050.TW"] 
-    
-    all_data = []
-    print("📡 開始執行全球資產掃描...")
-
-    for s in target_stocks:
-        res = get_stock_data(s)
-        if res:
-            all_data.append(res)
-
-    # 1. 先存 JSON (數據優先)
-    save_to_json(all_data)
-    analysis_results = json.dumps(all_data, ensure_ascii=False)
-
-    # --- 戰略隔離執行區塊：嚴格對齊 try-except ---
-    
-    # 2. 執行美股分析
-    try:
-        print("🚀 啟動美股戰略分析...")
-        us_report = report_us.generate_markdown_report(analysis_results)
-        report_us.save_report(us_report)
-    except Exception as e:
-        print(f"❌ 美股分析失敗: {e}")
-
-    # 3. 執行台股分析
-    try:
-        print("🚀 啟動台股戰術分析...")
-        tw_report = report_tw.generate_markdown_report(analysis_results)
-        report_tw.save_report(tw_report)
-    except Exception as e:
-        print(f"❌ 台股分析失敗: {e}")
-
-    print("🏁 全球資產戰報任務執行完畢。")
+    fetch_data()
