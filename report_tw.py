@@ -1,19 +1,16 @@
 import os
 import json
-import google.generativeai as genai
+# 🚨 關鍵修正：導入新版官方 SDK
+from google import genai
 
 def generate_analysis(data):
-    # 抓取 GitHub Secrets 傳進來的 API KEY
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         return "❌ 錯誤：找不到 GOOGLE_API_KEY 環境變數，無法通訊。"
     
-    genai.configure(api_key=api_key)
+    # 初始化新版 Client
+    client = genai.Client(api_key=api_key)
     
-    # 呼叫 Gemini 模型
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    
-    # 總監戰略 Prompt
     prompt = f"""
     你現在是「首席財富策略總監」。請根據以下的 JSON 盤後數據，產出今日的【台股盤後戰略報告】。
     請嚴格遵守台灣繁體中文術語規範（如：資訊、法人、盤後、籌碼）。
@@ -32,7 +29,11 @@ def generate_analysis(data):
     """
     
     try:
-        response = model.generate_content(prompt)
+        # 新版呼叫語法
+        response = client.models.generate_content(
+            model='gemini-1.5-pro',
+            contents=prompt
+        )
         return response.text
     except Exception as e:
         return f"❌ AI 分析失敗：{e}"
@@ -40,21 +41,17 @@ def generate_analysis(data):
 if __name__ == "__main__":
     json_path = "stock_data.json"
     
-    # 1. 檢查 JSON 是否存在
     if not os.path.exists(json_path):
         print(f"❌ 找不到數據檔 {json_path}，無法產出戰報。")
         exit(1)
         
-    # 2. 讀取 JSON
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
         
     print("🧠 正在呼叫 Gemini 總部進行台股戰略分析...")
     
-    # 3. 產出分析內容
     report_content = generate_analysis(data)
     
-    # 4. 寫入 Markdown 檔案
     if "❌" not in report_content:
         report_path = "report_tw.md"
         with open(report_path, "w", encoding="utf-8") as f:
