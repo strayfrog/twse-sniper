@@ -1,48 +1,51 @@
-import google.generativeai as genai
-import os
+import os, json, requests
+from datetime import datetime, timedelta
 
-# 配置 Gemini API
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+# --- 初始化 ---
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
+DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
 
-def generate_markdown_report(analysis_results):
-    """
-    使用 Gemini 1.5 Pro 生成台股分析報告
-    """
-    model = genai.GenerativeModel('gemini-1.5-pro')
+def generate_report():
+    if not os.path.exists('stock_data.json'): return
+    with open('stock_data.json', 'r', encoding='utf-8') as f:
+        data = json.load(f)
     
+    tw_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
+    
+    # 【核心升級：深度美股戰略指令】
     prompt = f"""
-    你是一位擁有 25 年經驗的「首席財富策略總監」兼「Sniper 戰場傳令兵」。
-    請針對以下台股法人籌碼與價位數據進行戰術解讀。
+    你是總帥的美股首席戰略官。禁止任何廢話與問候，直接進入「硬核戰報」。
     
-    規範：
-    1. 嚴禁使用中國大陸用語，一律使用台灣繁體中文術語（如：資訊、籌碼、軟體）。
-    2. 針對法人買賣超進行精準判斷。
-    3. 嚴禁保證獲利。
+    【情報數據】: {json.dumps(data, ensure_ascii=False)}
+    【戰略防線】: 
+    - VOOG：標普500成長股。戰術：大盤下殺見綠時，手動點射 1 股。
+    - MU/NVDA：半導體核心。戰術：獲利保護，死抱不放，無視短期震盪。
+    - MU/MUU :的價格比對，例如有無達到MU500的MUU停利點
     
-    數據內容：
-    {analysis_results}
+    【戰報結構要求】:
+    1. 📡 **美股戰情總結**: 用一句話定調昨日美股盤勢（如：多頭反攻、空頭壓制、高檔震盪）。
+    2. 📊 **標的深度透視**: 針對 VOOG, MU, NVDA，列出精確價格，並分析其走勢是否偏離防線。
+    3. ⚔️ **今日行動指令**: 
+       - 判斷今日開盤是否為「點射時刻」？
+       - 針對 NVDA 的持倉給出心理建設，強調「死抱」意志。
+       - MU若是跌到350以下需特別提醒，若漲到500以上長效單須取消
+    4. 💡 **風險預判**: 簡評今日可能影響市場的宏觀趨勢。
+    
+    語氣：專業、精確、冷酷。禁止使用軟弱字眼，改用「指令」、「執行」、「埋伏」。
     """
     
+    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
     try:
-        response = model.generate_content(prompt)
-        # 核心修正：防禦性檢查 candidates 屬性
-        if response and hasattr(response, 'candidates') and len(response.candidates) > 0:
-            if response.candidates[0].content.parts:
-                return response.text
-            else:
-                return "分析失敗：回應內容因安全過濾而被封鎖。"
-        else:
-            return f"分析失敗：模型未回傳有效 candidates。原始回應：{response}"
+        response = requests.post(api_url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=30)
+        report = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        
+        full_msg = f"🇺🇸 **【美股晨間硬核戰報 - {tw_time}】**\n{report}"
+        # 分段發送確保不截斷
+        for i in range(0, len(full_msg), 1900):
+            requests.post(DISCORD_URL, json={"content": full_msg[i:i+1900]})
+            
+        with open("report_us.md", "w", encoding="utf-8") as f: f.write(full_msg)
     except Exception as e:
-        return f"台股分析過程發生異常：{str(e)}"
+        print(f"美股分析失敗: {e}")
 
-def save_report(report_content, filename="report_tw.md"):
-    """
-    將報告寫入 Markdown 檔案
-    """
-    try:
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(report_content)
-        print(f"✅ 台股戰報已成功寫入：{filename}")
-    except Exception as e:
-        print(f"❌ 檔案寫入失敗：{str(e)}")
+if __name__ == "__main__": generate_report()
