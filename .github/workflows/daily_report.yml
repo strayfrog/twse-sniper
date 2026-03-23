@@ -1,44 +1,56 @@
-name: Daily Stock Sniper Report
-
-on:
-  schedule:
-    # 台北時間週一至週五 16:00 執行 (UTC 08:00)
-    - cron: '0 8 * * 1-5'
-  workflow_dispatch: # 允許手動觸發戰訊
-
-permissions:
-  contents: write # 關鍵：賦予寫入權限，否則無法更新 JSON 與 MD
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # 核心修正：安裝所有必要通訊裝備
-          pip install yfinance google-generativeai pandas
-
-      - name: Run Sniper Script
+- name: 🚀 雲端空投 (終極權限轉移版)
         env:
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
+          OWNER_EMAIL: "zzzz555tw@gmail.com" # 您的 Gmail
         run: |
-          # 執行主控台腳本
-          python twse_sniper.py
+          python - <<EOF
+          import os, json
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
 
-      - name: Commit and Push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add stock.json report_us.md report_tw.md
-          # 只有在檔案有變動時才 commit，避免 workflow 報錯
-          git diff --quiet && git diff --staged --quiet || (git commit -m "📉 戰報更新: $(date +'%Y-%m-%d %H:%M')" && git push)
+          try:
+              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
+              creds = service_account.Credentials.from_service_account_info(creds_json)
+              drive_service = build('drive', 'v3', credentials=creds)
+
+              files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
+              folder_id = os.environ['FOLDER_ID']
+              owner_email = os.environ['OWNER_EMAIL']
+
+              for file_name in files_to_upload:
+                  if not os.path.exists(file_name):
+                      continue
+                  
+                  # 1. 搜尋雲端是否已有檔案
+                  query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+                  results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+                  items = results.get('files', [])
+
+                  media = MediaFileUpload(file_name, resumable=True)
+                  
+                  if items:
+                      # 如果檔案已存在，直接更新（更新不會觸發 Quota 檢查）
+                      file_id = items[0]['id']
+                      drive_service.files().update(fileId=file_id, media_body=media).execute()
+                      print(f"✅ 已更新: {file_name}")
+                  else:
+                      # 2. 如果是新檔案，建立時強制轉移所有權
+                      file_metadata = {'name': file_name, 'parents': [folder_id]}
+                      file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                      file_id = file.get('id')
+                      
+                      # 關鍵動作：將所有權轉讓給總帥，並移除機器人的負擔
+                      permission = {
+                          'type': 'user',
+                          'role': 'owner',
+                          'emailAddress': owner_email
+                      }
+                      drive_service.permissions().create(fileId=file_id, body=permission, transferOwnership=True).execute()
+                      print(f"🚀 已上傳並轉移所有權: {file_name}")
+
+          except Exception as e:
+              print(f"❌ 嚴重錯誤: {e}")
+              exit(1)
+          EOF
