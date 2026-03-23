@@ -1,49 +1,75 @@
-name: Strategic Dual-Track Automation
+name: Global Tactical Intelligence (Data & Report)
 
 on:
   schedule:
-    # 台灣 07:55 (UTC 23:55，前一天)
-    - cron: '55 23 * * *'
-    # 台灣 15:55 (UTC 07:55)
-    - cron: '55 7 * * *'
-  push:
-    paths:
-      - 'stock_data.json'
+    # 台灣 08:00 (UTC 00:00) - 美股戰線
+    - cron: '0 0 * * *'
+    # 台灣 15:30 (UTC 07:30) - 台股戰線
+    - cron: '30 7 * * *'
   workflow_dispatch:
 
 jobs:
-  strategic_reporting:
+  intelligence_mission:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests yfinance beautifulsoup4 pandas lxml
 
-      - name: Run US Report
+      - name: 📈 第一階段：更新核心數據 (twse_sniper)
+        run: python twse_sniper.py
+
+      - name: 📝 第二階段：產出台美分析報告 (Gemini 驅動)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python report_us.py
+        run: |
+          python report_us.py
+          python report_tw.py
 
-      - name: Run TW Report
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: python report_tw.py
-
-      - name: Sync Reports to Repo
+      - name: 📡 同步至 GitHub 陣地
         run: |
           git config --global user.name "Strategic-Bot"
           git config --global user.email "bot@github.com"
-          git add report_us.md report_tw.md || true
-          git commit -m "📡 Update Tactical Reports (Pre-scheduled)" || exit 0
-          git push
+          git add stock_data.json report_us.md report_tw.md
+          git commit -m "🤖 偵巡更新：數據與戰術報告同步" || exit 0
+          git pull --rebase origin main
+          git push origin main
+
+      - name: 🚀 第三階段：空投至 Google Drive (SK-6 補給線)
+        uses: adityak74/google-drive-upload-action@main
+        with:
+          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
+          filename: "report_tw.md"
+          folderId: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
+          overwrite: "true"
+
+      - name: 🚀 (續) 空投美股報告
+        uses: adityak74/google-drive-upload-action@main
+        with:
+          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
+          filename: "report_us.md"
+          folderId: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
+          overwrite: "true"
+
+      - name: 🚀 (續) 空投 JSON 數據
+        uses: adityak74/google-drive-upload-action@main
+        with:
+          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
+          filename: "stock_data.json"
+          folderId: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
+          overwrite: "true"
