@@ -4,78 +4,57 @@ import time
 import requests
 import urllib3
 
-# 停用不安全的請求警告
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def fetch_data():
-    # 1. 標的名單精簡：移除導致系統異常的債券型 ETF，確保數據穩定
-    indices_list = ["^TWII", "^GSPC", "^IXIC", "^SOX"]
-    us_stocks = ["NVDA", "MU", "UPST", "VZ", "VT", "TLT", "VOOG"]
-    tw_targets = [
-        "0050", "0056", "00713", "00878", "00915", "00919", "00939", "00940", "00712", 
-        "2330", "2412", "2542", "4306", "2801", "2834", "2845", "2882", "2883", "2885", 
-        "2887", "2890", "6005", "6024"
-    ]
+    # 標的清單
+    indices = {"^TWII": "台股加權", "^GSPC": "標普500", "^IXIC": "那斯達克", "^DJI": "道瓊", "^SOX": "費半"}
+    tw_list = ["0050", "0056", "00713", "00878", "00915", "00919", "00939", "00940", "00858", "00712", "00931B", "00933B", "00948B", "2330", "2412", "2542", "4306", "2801", "2834", "2845", "2882", "2883", "2885", "2887", "2890", "6005", "6024"]
+    us_list = ["NVDA", "MU", "MUU", "UPST", "VZ", "VT", "TLT", "VOOG"]
     
-    result = {
-        "stocks": {}, 
-        "institutional_investors": {}, 
-        "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}
-    }
+    symbols = list(indices.keys()) + [f"{c}.TW" for c in tw_list] + us_list
+    result = {"stocks": {}, "institutional_investors": {}, "metadata": {"UpdateTime": time.strftime("%Y-%m-%d %H:%M:%S")}}
 
-    # A. 證交所官方 API 數據偵蒐
-    print("📡 啟動證交所 OpenAPI 數據同步...")
-    try:
-        url = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
-        resp = requests.get(url, timeout=20)
-        if resp.status_code == 200:
-            tw_data = resp.json()
-            # 建立代碼與價格的對照表
-            tw_price_map = {item['Code']: item['ClosingPrice'] for item in tw_data}
-            for code in tw_targets:
-                price = tw_price_map.get(code)
-                if price and price not in ['-', '0.00']:
-                    result["stocks"][code] = {
-                        "Price": float(str(price).replace(",", "")),
-                        "Currency": "TWD"
-                    }
-    except Exception as e:
-        print(f"⚠️ 證交所 API 異常：{e}")
-
-    # B. Yahoo Finance 獲取指數與美股數據
-    print("📡 啟動 Yahoo Finance 數據抓取...")
-    for sym in indices_list + us_stocks:
+    # A. 抓取股價
+    print("📡 正在同步台美股價...")
+    tickers = yf.Tickers(" ".join(symbols))
+    for sym in symbols:
         try:
-            ticker = yf.Ticker(sym)
-            # 使用歷程記錄確保數據獲取成功
-            hist = ticker.history(period="1d")
-            if not hist.empty:
-                p = hist['Close'].iloc[-1]
-                name = sym.replace("^", "")
-                result["stocks"][name] = {
-                    "Price": round(float(p), 2),
-                    "Currency": "USD" if sym in us_stocks else "PTS"
-                }
-        except:
-            pass
+            price = tickers.tickers[sym].fast_info['last_price']
+            clean_code = sym.replace(".TW", "")
+            result["stocks"][clean_code] = {
+                "Price": round(price, 2), 
+                "Currency": "USD" if clean_code in us_list else ("PTS" if clean_code in indices else "TWD")
+            }
+        except: continue
 
-    # C. 三大法人籌碼數據
-    print("📡 抓取法人籌碼資訊...")
+    # B. 三大法人 (切換為穩定路徑 + 偽裝標頭)
+    print("📡 正在強制突擊法人籌碼...")
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     try:
-        f_url = "https://www.twse.com.tw/fund/BFI82U?response=json"
-        f_resp = requests.get(f_url, verify=False, timeout=20)
-        f_data = f_resp.json()
-        if 'data' in f_data:
-            for row in f_data['data']:
-                # row[0] 為法人名稱, row[3] 為買賣超金額
-                result["institutional_investors"][row[0]] = f"{round(float(row[3].replace(',', '')) / 100000000, 2)} 億"
-    except:
-        pass
+        # 改用這個節點，資料格式最穩定
+        url = "https://www.twse.com.tw/fund/BFI82U?response=json"
+        resp = requests.get(url, headers=headers, verify=False, timeout=20)
+        
+        if resp.status_code == 200:
+            data = resp.json()
+            # 格式解析：data['data'] 是一個列表，每一項是 [單位名稱, 買進, 賣出, 差額]
+            if 'data' in data:
+                for row in data['data']:
+                    name = row[0]
+                    diff_str = row[3].replace(",", "")
+                    billion = round(float(diff_str) / 100000000, 2)
+                    result["institutional_investors"][name] = f"{billion} 億"
+            else:
+                result["institutional_investors"]["status"] = "證交所尚未開牌"
+        else:
+            result["institutional_investors"]["status"] = f"連線受阻 (Code: {resp.status_code})"
+    except Exception as e:
+        result["institutional_investors"]["status"] = f"偵巡異常: {str(e)}"
 
-    # 4. 儲存戰報 JSON 檔案
     with open('stock_data.json', 'w', encoding='utf-8') as f:
         json.dump(result, f, ensure_ascii=False, indent=4)
-    print("✅ 全球資產數據同步完成。")
+    print("✅ 全球資產戰報數據更新成功。")
 
 if __name__ == "__main__":
     fetch_data()
