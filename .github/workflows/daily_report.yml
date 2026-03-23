@@ -1,8 +1,9 @@
+
 name: Global Tactical Intelligence (Data & Report)
 
 on:
   schedule:
-    - cron: '30 7 * * *'    # 台灣 15:30 (台股)
+    - cron: '30 7 * * *'    # 台灣 15:30
     - cron: '30 0 * * 2-6'  # 台灣 08:30 (美股)
   workflow_dispatch:
 
@@ -26,7 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-      - name: 📈 執行數據更新與報告產出
+      - name: 📈 第一階段：更新核心數據與產出報告
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -48,7 +49,7 @@ jobs:
             git push origin main
           fi
 
-      - name: 🚀 雲端空投 (修正 Quota 空間限制版)
+      - name: 🚀 第二階段：原生 Python 空投 Google Drive
         env:
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
@@ -59,38 +60,31 @@ jobs:
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
 
-          try:
-              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
-              creds = service_account.Credentials.from_service_account_info(creds_json)
-              drive_service = build('drive', 'v3', credentials=creds)
+          # 載入憑證
+          creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
+          creds = service_account.Credentials.from_service_account_info(creds_json)
+          drive_service = build('drive', 'v3', credentials=creds)
 
-              files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
-              folder_id = os.environ['FOLDER_ID']
+          files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
+          folder_id = os.environ['FOLDER_ID']
 
-              for file_name in files_to_upload:
-                  if not os.path.exists(file_name):
-                      print(f"找不到檔案: {file_name}，跳過。")
-                      continue
-                  
-                  # 檢查雲端是否已有同名檔案
-                  query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
-                  results = drive_service.files().list(q=query, spaces='drive', fields='files(id)', supportsAllDrives=True, includeItemsFromAllDrives=True).execute()
-                  items = results.get('files', [])
+          for file_name in files_to_upload:
+              if not os.path.exists(file_name):
+                  print(f"Skipping {file_name}, file not found.")
+                  continue
+              
+              # 先尋找是否已存在舊檔，有的話就更新
+              query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+              results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+              items = results.get('files', [])
 
-                  media = MediaFileUpload(file_name, resumable=True)
-                  
-                  if items:
-                      # 更新現有檔案 (不會消耗服務帳戶空間)
-                      file_id = items[0]['id']
-                      drive_service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
-                      print(f"已更新 Google Drive 檔案: {file_name}")
-                  else:
-                      # 建立新檔案
-                      file_metadata = {'name': file_name, 'parents': [folder_id]}
-                      drive_service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
-                      print(f"已成功空投新檔案: {file_name}")
-
-          except Exception as e:
-              print(f"空投失敗，錯誤訊息: {e}")
-              exit(1)
+              media = MediaFileUpload(file_name, resumable=True)
+              if items:
+                  file_id = items[0]['id']
+                  drive_service.files().update(fileId=file_id, media_body=media).execute()
+                  print(f"Updated {file_name} in Google Drive.")
+              else:
+                  file_metadata = {'name': file_name, 'parents': [folder_id]}
+                  drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                  print(f"Uploaded {file_name} to Google Drive.")
           EOF
