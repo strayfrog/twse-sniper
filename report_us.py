@@ -1,52 +1,7 @@
-import os, json, requests
-from datetime import datetime, timedelta
+# --- 起始關鍵字：def generate_markdown_report ---
+def generate_markdown_report(analysis_results):
+    # ... 內部的 API 邏輯 ...
+# --- 結束關鍵字：return (或是函式結尾) ---
 
-# --- 初始化 ---
-GEMINI_KEY = os.getenv("GEMINI_API_KEY")
-DISCORD_URL = os.getenv("DISCORD_WEBHOOK_URL")
-
-def generate_report():
-    if not os.path.exists('stock_data.json'): return
-    with open('stock_data.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    
-    tw_time = (datetime.utcnow() + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M')
-    
-    # 【核心升級：深度美股戰略指令】
-    prompt = f"""
-    你是總帥的美股首席戰略官。禁止任何廢話與問候，直接進入「硬核戰報」。
-    
-    【情報數據】: {json.dumps(data, ensure_ascii=False)}
-    【戰略防線】: 
-    - VOOG：標普500成長股。戰術：大盤下殺見綠時，手動點射 1 股。
-    - MU/NVDA：半導體核心。戰術：獲利保護，死抱不放，無視短期震盪。
-    - MU/MUU :的價格比對，例如有無達到MU500的MUU停利點
-    
-    【戰報結構要求】:
-    1. 📡 **美股戰情總結**: 用一句話定調昨日美股盤勢（如：多頭反攻、空頭壓制、高檔震盪）。
-    2. 📊 **標的深度透視**: 針對 VOOG, MU, NVDA，列出精確價格，並分析其走勢是否偏離防線。
-    3. ⚔️ **今日行動指令**: 
-       - 判斷今日開盤是否為「點射時刻」？
-       - 針對 NVDA 的持倉給出心理建設，強調「死抱」意志。
-       - MU若是跌到350以下需特別提醒，若漲到500以上長效單須取消
-    4. 💡 **風險預判**: 簡評今日可能影響市場的宏觀趨勢。
-    
-    語氣：專業、精確、冷酷。禁止使用軟弱字眼，改用「指令」、「執行」、「埋伏」。
-    """
-    
-    api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_KEY}"
-   # --- 起始關鍵字：report = response.json() ---
-try:
-    res_data = response.json()
-    if "candidates" in res_data and len(res_data["candidates"]) > 0:
-        report = res_data["candidates"][0]["content"]["parts"][0]["text"]
-    else:
-        # 這裡會捕捉到 API 拒絕回答的情況，並紀錄原因
-        error_msg = res_data.get("feedback", "未知 API 過濾錯誤")
-        report = f"⚠️ 總部拒絕下令：API 未回傳分析內容。原因：{error_msg}"
-        print(f"DEBUG: API Response Error: {res_data}")
-except (KeyError, IndexError, Exception) as e:
-    report = f"❌ 戰訊解讀崩潰：解析 JSON 時發生錯誤 {str(e)}"
-# --- 結束關鍵字：(下一行寫入檔案的邏輯) ---
-
-if __name__ == "__main__": generate_report()
+def save_report(report_content, filename="report_us.md"):
+    # ... 寫入檔案邏輯 ...
