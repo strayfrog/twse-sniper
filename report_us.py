@@ -1,47 +1,68 @@
-import google.generativeai as genai
 import os
 import json
+import google.generativeai as genai
 
 def generate_analysis(data):
-    """
-    使用 Gemini 1.5 Flash 分析美股數據
-    """
-    api_key = os.getenv("GEMINI_API_KEY")
+    # 抓取 GitHub Secrets 傳進來的 API KEY
+    api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        return "錯誤: 找不到 GEMINI_API_KEY 環境變數"
-
+        return "❌ 錯誤：找不到 GOOGLE_API_KEY 環境變數，無法通訊。"
+    
     genai.configure(api_key=api_key)
     
-    # 設定安全性過濾器
-    safety_settings = [
-        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-    ]
-
-    model = genai.GenerativeModel(
-        model_name='gemini-1.5-flash',
-        safety_settings=safety_settings
-    )
+    # 呼叫 Gemini 模型
+    model = genai.GenerativeModel('gemini-1.5-pro') 
     
+    # 總監戰略 Prompt (美股專用)
     prompt = f"""
-    你是一位專業的美股投資專家。請分析以下提供的美股市場數據 JSON，
-    產出一份針對專業投資者的分析報告。
-    請特別專注於技術面走勢與關鍵支撐壓力位。
-    
-    數據內容：
-    {json.dumps(data, ensure_ascii=False, indent=2)}
-    """
+    你現在是「首席財富策略總監」。請根據以下的 JSON 盤後數據，產出今日的【美股晨間戰略報告】。
+    請嚴格遵守台灣繁體中文術語規範。
 
+    報告必須包含以下五大結構，並使用 Markdown 格式排版：
+    ### I. 現金流與緊急預備金分析
+    ### II. 目標量化時程表
+    ### III. 投資組合策略表格
+    ### IV. 保障規劃優化
+    ### V. 下一步行動清單
+
+    以下是今日全球市場數據（請著重分析美股標的如 VOO, VOOG, MU, NVDA 等）：
+    ```json
+    {json.dumps(data, ensure_ascii=False, indent=2)}
+    ```
+    """
+    
     try:
         response = model.generate_content(prompt)
-        if response and response.text:
-            return response.text
-        else:
-            return "Gemini 未能產生美股分析內容。"
+        return response.text
     except Exception as e:
-        return f"美股分析執行失敗: {str(e)}"
+        return f"❌ AI 分析失敗：{e}"
 
 if __name__ == "__main__":
-    pass
+    json_path = "stock_data.json"
+    
+    # 1. 檢查 JSON 是否存在
+    if not os.path.exists(json_path):
+        print(f"❌ 找不到數據檔 {json_path}，無法產出戰報。")
+        exit(1)
+        
+    # 2. 讀取 JSON
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        
+    print("🧠 正在呼叫 Gemini 總部進行美股戰略分析...")
+    
+    # 3. 產出分析內容
+    report_content = generate_analysis(data)
+    
+    # 4. 寫入 Markdown 檔案
+    if "❌" not in report_content:
+        report_path = "report_us.md"
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write("# 🇺🇸 每日美股晨間戰略報告\n\n")
+            f.write(f"**數據更新時間：** {data.get('metadata', {}).get('UpdateTime', '未知')}\n\n")
+            f.write("---\n\n")
+            f.write(report_content)
+        print(f"✅ 美股戰報產出成功！已儲存至 {report_path}")
+    else:
+        print(report_content)
+        exit(1)
