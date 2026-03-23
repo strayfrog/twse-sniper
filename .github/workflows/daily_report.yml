@@ -1,8 +1,58 @@
-- name: 🚀 雲端空投 (終極權限轉移版)
+name: Global Tactical Intelligence (Data & Report)
+
+on:
+  schedule:
+    - cron: '30 7 * * *'
+    - cron: '30 0 * * 2-6'
+  workflow_dispatch:
+
+jobs:
+  intelligence_mission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+      - name: 📈 執行數據更新與報告產出
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          python twse_sniper.py
+          python report_us.py
+          python report_tw.py
+
+      - name: 📡 同步至 GitHub 陣地
+        run: |
+          git config --global user.name "Strategic-Bot"
+          git config --global user.email "bot@github.com"
+          git add stock_data.json report_us.md report_tw.md
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "🤖 偵巡更新：數據與報告同步"
+            git pull --rebase origin main
+            git push origin main
+          fi
+
+      - name: 🚀 雲端空投 (終極權限轉移版)
         env:
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
-          OWNER_EMAIL: "zzzz555tw@gmail.com" # 您的 Gmail
+          OWNER_EMAIL: "zzzz555tw@gmail.com"
         run: |
           python - <<EOF
           import os, json
@@ -23,34 +73,29 @@
                   if not os.path.exists(file_name):
                       continue
                   
-                  # 1. 搜尋雲端是否已有檔案
+                  media = MediaFileUpload(file_name, resumable=True)
                   query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
                   results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
                   items = results.get('files', [])
 
-                  media = MediaFileUpload(file_name, resumable=True)
-                  
                   if items:
-                      # 如果檔案已存在，直接更新（更新不會觸發 Quota 檢查）
                       file_id = items[0]['id']
-                      drive_service.files().update(fileId=file_id, media_body=media).execute()
+                      drive_service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
                       print(f"✅ 已更新: {file_name}")
                   else:
-                      # 2. 如果是新檔案，建立時強制轉移所有權
                       file_metadata = {'name': file_name, 'parents': [folder_id]}
-                      file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                      # 建立檔案時若報空間不足，此段會報錯，但我們在下一步會試圖轉移所有權
+                      file = drive_service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
                       file_id = file.get('id')
                       
-                      # 關鍵動作：將所有權轉讓給總帥，並移除機器人的負擔
-                      permission = {
-                          'type': 'user',
-                          'role': 'owner',
-                          'emailAddress': owner_email
-                      }
-                      drive_service.permissions().create(fileId=file_id, body=permission, transferOwnership=True).execute()
-                      print(f"🚀 已上傳並轉移所有權: {file_name}")
+                      # 強制轉移所有權給總帥，讓空間扣在總帥頭上
+                      permission = {'type': 'user', 'role': 'owner', 'emailAddress': owner_email}
+                      drive_service.permissions().create(fileId=file_id, body=permission, transferOwnership=True, supportsAllDrives=True).execute()
+                      print(f"🚀 已上傳並轉移權限: {file_name}")
 
           except Exception as e:
-              print(f"❌ 嚴重錯誤: {e}")
+              print(f"❌ 錯誤: {e}")
+              if "storageQuotaExceeded" in str(e):
+                  print("⚠️ 空間依然不足。請手動上傳一次空的 report_tw.md 到該資料夾，之後更新就不會扣 Quota 了。")
               exit(1)
           EOF
