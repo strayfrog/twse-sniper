@@ -2,9 +2,8 @@ name: Global Tactical Intelligence (Data Fetch Only)
 
 on:
   schedule:
-    # 🚨 時間已校正：台股 15:50 (UTC 07:50)，美股 07:50 (UTC 23:50，因跨日故設定為美東隔日)
     - cron: '50 7 * * *'    # 台灣 15:50 (台股)
-    - cron: '50 23 * * 1-5' # 台灣 07:50 (美股週二至週六，對應 UTC 週一至週五)
+    - cron: '50 23 * * 1-5' # 台灣 07:50 (美股週二至週六)
   workflow_dispatch:
 
 jobs:
@@ -25,7 +24,6 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # 🚨 拔除所有與 AI 相關的套件，只保留爬蟲與 GDrive 必需品
           python -m pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
       - name: 📈 第一階段：偵蒐開盤狀態與擷取數據
@@ -38,4 +36,86 @@ jobs:
 
           # 強制鎖定台灣時間
           tw_tz = timezone(timedelta(hours=8))
-          today_str = datetime.now(tw_tz).strftime('%Y%m
+          today_str = datetime.now(tw_tz).strftime('%Y%m%d')
+          print(f"--- 戰前偵蒐開始 (今日台灣時間: {today_str}) ---")
+
+          try:
+              resp = requests.get("https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule", timeout=10)
+              holidays = resp.json()
+              is_holiday = any(h.get('Date') == today_str for h in holidays)
+              
+              if is_holiday:
+                  reason = [h.get('Name') for h in holidays if h.get('Date') == today_str][0]
+                  print(f"🛑 證交所公告今日休市 ({reason})，停止作戰。")
+                  sys.exit(0)
+              
+              if datetime.now(tw_tz).weekday() >= 5:
+                  print("🛑 今日為週末，市場不開門，停止作戰。")
+                  sys.exit(0)
+
+              print("✅ 偵蒐完成：今日為交易日，準備開火！")
+          except Exception as e:
+              print(f"⚠️ 證交所 API 連線異常 ({e})，改採基本週末判斷。")
+              if datetime.now(tw_tz).weekday() >= 5: 
+                  sys.exit(0)
+
+          print("🚀 啟動 twse_sniper.py ...")
+          exit_code = subprocess.call([sys.executable, "twse_sniper.py"])
+          if exit_code != 0:
+              print(f"❌ twse_sniper.py 執行崩潰！錯誤代碼: {exit_code}")
+              sys.exit(1)
+          EOF
+
+      - name: 📡 同步 JSON 至 GitHub 陣地
+        run: |
+          git config --global user.name "Strategic-Bot"
+          git config --global user.email "bot@github.com"
+          git add stock_data.json
+          if git diff --staged --quiet; then
+            echo "沒有變動需同步"
+          else
+            git commit -m "🤖 偵巡更新：純數據 JSON 同步"
+            git pull --rebase origin main
+            git push origin main
+          fi
+
+      - name: 🚀 第二階段：JSON 雲端空投 (覆蓋 / 新建 Google Drive)
+        env:
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
+        run: |
+          python - << 'EOF'
+          import os, json, sys
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+
+          file_name = 'stock_data.json'
+          if not os.path.exists(file_name):
+              print("❌ 找不到數據檔，跳過雲端空投。")
+              sys.exit(0)
+
+          try:
+              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
+              creds = service_account.Credentials.from_service_account_info(creds_json)
+              drive_service = build('drive', 'v3', credentials=creds)
+              folder_id = os.environ['FOLDER_ID']
+
+              query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+              results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+              items = results.get('files', [])
+
+              media = MediaFileUpload(file_name, resumable=True)
+              if items:
+                  file_id = items[0]['id']
+                  drive_service.files().update(fileId=file_id, media_body=media).execute()
+                  print(f"✅ 雲端覆蓋成功: {file_name}")
+              else:
+                  print(f"⚠️ 找不到舊檔，建立新檔: {file_name}")
+                  file_metadata = {'name': file_name, 'parents': [folder_id]}
+                  drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                  print(f"✅ 雲端新建成功: {file_name}")
+          except Exception as e:
+              print(f"❌ 雲端同步崩潰: {e}")
+              sys.exit(1)
+          EOF
