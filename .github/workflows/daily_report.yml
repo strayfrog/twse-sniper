@@ -8,26 +8,29 @@ on:
     - cron: '30 0 * * 2-6'
   workflow_dispatch:
 
+# 重點修正 1：顯式聲明權限，解決 git push 403 錯誤
+permissions:
+  contents: write
+
 jobs:
   build-and-report:
     runs-on: ubuntu-latest
     
     steps:
       - name: 檢出程式碼
-        uses: actions/checkout@v4 # 升級至 v4 以獲取更好性能
+        uses: actions/checkout@v4
 
-      - name: 設定 Python 環境 (升級至 3.12)
-        uses: actions/setup-python@v5 # 升級至 v5
+      - name: 設定 Python 環境
+        # 重點修正 2：升級至 3.12 以符合 pandas-ta 最新版需求
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: 安裝必要依賴
         run: |
           python -m pip install --upgrade pip
-          # 先安裝基礎套件
-          pip install --upgrade yfinance google-generativeai pandas requests
-          # 安裝 pandas-ta (Python 3.12 下將能正確抓取最新版)
-          pip install --upgrade pandas-ta
+          # 重點修正 3：修正套件名稱為 pandas-ta 並強制更新 yfinance
+          pip install --upgrade yfinance google-generativeai pandas requests pandas-ta
 
       - name: 執行數據分析與報告產出
         env:
@@ -40,6 +43,6 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .
-          git diff --quiet && git diff --staged --quiet || git commit -m "Auto: Update stock data $(date +'%Y-%m-%d')"
-          git push
+          # 檢查是否有檔案變動，若有則提交並推送
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto: Update stock data $(date +'%Y-%m-%d')" && git push)
         continue-on-error: true
