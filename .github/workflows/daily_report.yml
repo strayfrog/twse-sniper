@@ -20,53 +20,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip' # 啟用快取機制，提升戰備速度
+          # 注意：這裡嚴禁加入 cache 屬性，避免因找不到檔案而報錯
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          # 確保所有通訊與分析模組正確安裝到當前 Python 環境
+          # 強制安裝所有必要戰略模組
           python -m pip install requests yfinance beautifulsoup4 pandas lxml \
             google-api-python-client google-auth-httplib2 google-auth-oauthlib \
             google-generativeai
 
-      - name: 📈 第一階段：偵蒐開盤狀態與執行腳本
+      - name: 📈 執行戰略分析任務
         env:
-          # 關鍵修正：將 GEMINI_API_KEY 映射為腳本所需的 GOOGLE_API_KEY
+          # 統一金鑰名稱，確保 Python 讀得到
           GOOGLE_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          python - <<EOF
-          import requests
-          from datetime import datetime
-          import os
-          import sys
-
-          today_str = datetime.now().strftime('%Y%m%d')
-          print(f"--- 戰前偵蒐開始 (今日: {today_str}) ---")
-
-          # 1. 偵蒐台股是否休市
-          try:
-              resp = requests.get("https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule", timeout=10)
-              holidays = resp.json()
-              is_holiday = any(h.get('Date') == today_str for h in holidays)
-              
-              if is_holiday:
-                  reason = [h.get('Name') for h in holidays if h.get('Date') == today_str][0]
-                  print(f"🛑 證交所公告今日休市 ({reason})，停止作戰。")
-                  # 如果是美股時段 (08:30)，即便台股休市也應繼續執行美股部分
-                  # 這裡暫不強行 exit，改由腳本內部判斷或繼續執行
-          except Exception as e:
-              print(f"⚠️ 偵蒐異常 ({e})，改採基本週末判斷。")
-
-          # 2. 執行核心作戰腳本 (使用 sys.executable 確保環境一致性)
-          print("🚀 執行核心分析...")
-          exit_code = os.system(f"{sys.executable} twse_sniper.py")
-          
-          if exit_code != 0:
-              print(f"❌ 腳本執行崩潰，代碼: {exit_code}")
-              sys.exit(1)
-          EOF
+          # 這裡直接執行 Python，不再用 heredoc 包裹，避免環境變數傳遞失敗
+          python twse_sniper.py
+          # 如果你的主程式沒寫好呼叫，補上這兩行，但建議由 twse_sniper.py 統一調度
+          # python report_us.py
+          # python report_tw.py
 
       - name: 📡 同步至 GitHub 陣地
         run: |
@@ -77,46 +51,5 @@ jobs:
             echo "沒有變動需同步"
           else
             git commit -m "🤖 偵巡更新：數據與報告同步"
-            git pull --rebase origin main
             git push origin main
           fi
-
-      - name: 🚀 第二階段：雲端空投 (覆蓋 Google Drive)
-        env:
-          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
-          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
-        run: |
-          python - <<EOF
-          import os, json, sys
-          from google.oauth2 import service_account
-          from googleapiclient.discovery import build
-          from googleapiclient.http import MediaFileUpload
-
-          files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
-          if not any(os.path.exists(f) for f in files_to_upload):
-              print("找不到新產出的戰報，跳過雲端空投。")
-              exit(0)
-
-          try:
-              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
-              creds = service_account.Credentials.from_service_account_info(creds_json)
-              drive_service = build('drive', 'v3', credentials=creds)
-              folder_id = os.environ['FOLDER_ID']
-
-              for file_name in files_to_upload:
-                  if os.path.exists(file_name):
-                      query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
-                      results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
-                      items = results.get('files', [])
-
-                      media = MediaFileUpload(file_name, resumable=True)
-                      if items:
-                          file_id = items[0]['id']
-                          drive_service.files().update(fileId=file_id, media_body=media).execute()
-                          print(f"✅ 雲端更新成功: {file_name}")
-                      else:
-                          print(f"❌ 錯誤: 雲端找不到佔位檔 {file_name}")
-          except Exception as e:
-              print(f"❌ 雲端同步失敗: {e}")
-              sys.exit(1)
-          EOF
