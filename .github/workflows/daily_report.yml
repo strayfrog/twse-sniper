@@ -2,100 +2,43 @@ name: Global Tactical Intelligence (Data & Report)
 
 on:
   schedule:
+    # 原始排程 1：每天 07:30 UTC (台北 15:30)，鎖定台股盤後分析
     - cron: '30 7 * * *'
+    # 原始排程 2：週二至週六 00:30 UTC (台北 08:30)，鎖定美股盤後分析
     - cron: '30 0 * * 2-6'
   workflow_dispatch:
 
 jobs:
-  intelligence_mission:
+  build-and-report:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
+    
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - name: 檢出程式碼
+        uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          cache: 'pip'
 
-      - name: Install Dependencies
+      - name: 安裝必要依賴
         run: |
           python -m pip install --upgrade pip
-          pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
+          # 強制更新 yfinance 以修正 404/possibly delisted 錯誤
+          pip install --upgrade yfinance google-generativeai pandas pandas_ta requests
 
-      - name: 📈 執行數據更新與報告產出
+      - name: 執行數據分析與報告產出
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           python twse_sniper.py
-          python report_us.py
-          python report_tw.py
 
-      - name: 📡 同步至 GitHub 陣地
+      - name: 自動提交更新
         run: |
-          git config --global user.name "Strategic-Bot"
-          git config --global user.email "bot@github.com"
-          git add stock_data.json report_us.md report_tw.md
-          if git diff --staged --quiet; then
-            echo "No changes"
-          else
-            git commit -m "🤖 偵巡更新：數據與報告同步"
-            git pull --rebase origin main
-            git push origin main
-          fi
-
-      - name: 🚀 雲端空投 (終極權限轉移版)
-        env:
-          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
-          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
-          OWNER_EMAIL: "zzzz555tw@gmail.com"
-        run: |
-          python - <<EOF
-          import os, json
-          from google.oauth2 import service_account
-          from googleapiclient.discovery import build
-          from googleapiclient.http import MediaFileUpload
-
-          try:
-              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
-              creds = service_account.Credentials.from_service_account_info(creds_json)
-              drive_service = build('drive', 'v3', credentials=creds)
-
-              files_to_upload = ['report_tw.md', 'report_us.md', 'stock_data.json']
-              folder_id = os.environ['FOLDER_ID']
-              owner_email = os.environ['OWNER_EMAIL']
-
-              for file_name in files_to_upload:
-                  if not os.path.exists(file_name):
-                      continue
-                  
-                  media = MediaFileUpload(file_name, resumable=True)
-                  query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
-                  results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
-                  items = results.get('files', [])
-
-                  if items:
-                      file_id = items[0]['id']
-                      drive_service.files().update(fileId=file_id, media_body=media, supportsAllDrives=True).execute()
-                      print(f"✅ 已更新: {file_name}")
-                  else:
-                      file_metadata = {'name': file_name, 'parents': [folder_id]}
-                      # 建立檔案時若報空間不足，此段會報錯，但我們在下一步會試圖轉移所有權
-                      file = drive_service.files().create(body=file_metadata, media_body=media, fields='id', supportsAllDrives=True).execute()
-                      file_id = file.get('id')
-                      
-                      # 強制轉移所有權給總帥，讓空間扣在總帥頭上
-                      permission = {'type': 'user', 'role': 'owner', 'emailAddress': owner_email}
-                      drive_service.permissions().create(fileId=file_id, body=permission, transferOwnership=True, supportsAllDrives=True).execute()
-                      print(f"🚀 已上傳並轉移權限: {file_name}")
-
-          except Exception as e:
-              print(f"❌ 錯誤: {e}")
-              if "storageQuotaExceeded" in str(e):
-                  print("⚠️ 空間依然不足。請手動上傳一次空的 report_tw.md 到該資料夾，之後更新就不會扣 Quota 了。")
-              exit(1)
-          EOF
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto: Update stock data $(date +'%Y-%m-%d')"
+          git push
+        continue-on-error: true
