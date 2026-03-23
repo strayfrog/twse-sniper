@@ -12,10 +12,6 @@
             "Price": 21647.61,
             "Currency": "PTS"
         },
-        "^DJI": {
-            "Price": 45577.47,
-            "Currency": "PTS"
-        },
         "^SOX": {
             "Price": 7670.61,
             "Currency": "PTS"
@@ -120,10 +116,6 @@
             "Price": 422.88,
             "Currency": "USD"
         },
-        "MUU": {
-            "Price": 194.34,
-            "Currency": "USD"
-        },
         "UPST": {
             "Price": 25.98,
             "Currency": "USD"
@@ -154,6 +146,6 @@
         "合計": "-1046.27 億"
     },
     "metadata": {
-        "UpdateTime": "2026-03-23 09:30:44"
+        "UpdateTime": "2026-03-23 09:32:44"
     }
 }
