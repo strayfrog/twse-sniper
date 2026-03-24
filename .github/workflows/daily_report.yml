@@ -2,7 +2,7 @@ name: Global Tactical Intelligence (Data Fetch Only)
 
 on:
   schedule:
-    - cron: '50 7 * * *'    # 台灣 15:50 (台股)
+    - cron: '30 7 * * *'    # 台灣 15:50 (台股)
     - cron: '30 23 * * 1-5' # 台灣 07:50 (美股週二至週六)
   workflow_dispatch:
 
