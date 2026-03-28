@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-      - name: 📈 第一階段：偵蒐開盤狀態與擷取數據
+     - name: 📈 第一階段：偵蒐開盤狀態與擷取數據
         run: |
           python - << 'EOF'
           import requests
@@ -41,9 +41,20 @@ jobs:
 
           # 強制鎖定台灣時間
           tw_tz = timezone(timedelta(hours=8))
-          today_str = datetime.now(tw_tz).strftime('%Y%m%d')
+          now_tw = datetime.now(tw_tz)
+          today_str = now_tw.strftime('%Y%m%d')
+          weekday = now_tw.weekday()
+          
           print(f"--- 戰前偵蒐開始 (今日台灣時間: {today_str}) ---")
 
+          # 1. 週末判斷：只有週日才全面停止 (因為六日美股都休盤，週日早上不會有新數據)
+          if weekday == 6:
+              print("🛑 今日為週日，全球市場皆休市，停止作戰。")
+              sys.exit(0)
+          elif weekday == 5:
+              print("📡 今日為週六，台股休市，但需核實「美股週五收盤戰果」，准許放行！")
+
+          # 2. 台股休市判斷：即使台股休市，也不中斷程式，確保美股能正常抓取
           try:
               resp = requests.get("https://openapi.twse.com.tw/v1/holidaySchedule/holidaySchedule", timeout=10)
               holidays = resp.json()
@@ -51,18 +62,12 @@ jobs:
               
               if is_holiday:
                   reason = [h.get('Name') for h in holidays if h.get('Date') == today_str][0]
-                  print(f"🛑 證交所公告今日休市 ({reason})，停止作戰。")
-                  sys.exit(0)
-              
-              if datetime.now(tw_tz).weekday() >= 5:
-                  print("🛑 今日為週末，市場不開門，停止作戰。")
-                  sys.exit(0)
-
-              print("✅ 偵蒐完成：今日為交易日，準備開火！")
+                  print(f"⚠️ 證交所公告今日台股休市 ({reason})，但將持續偵蒐美股動態！")
+              else:
+                  if weekday < 5:
+                      print("✅ 偵蒐完成：今日台美皆為交易日，準備開火！")
           except Exception as e:
-              print(f"⚠️ 證交所 API 連線異常 ({e})，改採基本週末判斷。")
-              if datetime.now(tw_tz).weekday() >= 5: 
-                  sys.exit(0)
+              print(f"⚠️ 證交所 API 連線異常 ({e})，忽略台股休市判斷，繼續執行。")
 
           print("🚀 啟動 twse_sniper.py ...")
           exit_code = subprocess.call([sys.executable, "twse_sniper.py"])
@@ -70,7 +75,6 @@ jobs:
               print(f"❌ twse_sniper.py 執行崩潰！錯誤代碼: {exit_code}")
               sys.exit(1)
           EOF
-
       - name: 📡 同步 JSON 至 GitHub 陣地
         run: |
           git config --global user.name "Strategic-Bot"
