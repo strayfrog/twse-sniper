@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install requests yfinance beautifulsoup4 pandas lxml google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-     - name: 📈 第一階段：偵蒐開盤狀態與擷取數據
+      - name: 📈 第一階段：偵蒐開盤狀態與擷取數據
         run: |
           python - << 'EOF'
           import requests
@@ -75,6 +75,7 @@ jobs:
               print(f"❌ twse_sniper.py 執行崩潰！錯誤代碼: {exit_code}")
               sys.exit(1)
           EOF
+
       - name: 📡 同步 JSON 至 GitHub 陣地
         run: |
           git config --global user.name "Strategic-Bot"
