@@ -1,7 +1,9 @@
 import pandas as pd
 import requests
 import os
+from io import StringIO
 from datetime import datetime
+
 
 # ==========================================
 # 00981A 籌碼情報偵察兵 (強攻 HTML 解析版)
@@ -30,7 +32,7 @@ def main():
 
         # 2. 精準解析表格 (利用 match 參數尋找包含特定字眼的表格)
         # 統一網站上的表頭叫做「股票名稱」，我們就叫 pandas 去找這個詞
-        tables = pd.read_html(res.text, match='股票名稱')
+        tables = pd.read_html(StringIO(res.text), match='股票名稱')
         
         if not tables:
              raise ValueError("在網頁中找不到含有 '股票名稱' 的表格，網頁排版可能已大改！")
