@@ -39,3 +39,51 @@ jobs:
           git add 00981A_holdings.csv
           # 如果沒有變動就不 commit，有變動才 commit 並 push
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 自動更新 00981A 籌碼歷史資料" && git push)
+
+          - name: 🚀 最終階段：CSV 籌碼情報雲端空投
+        env:
+          # 延用您原本設定好的 Secret 密鑰
+          GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          # 請確認這是您要存放 00981A 情報的資料夾 ID
+          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi" 
+        run: |
+          python - << 'EOF'
+          import os, json, sys
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+
+          # 🎯 目標改為 00981A 的 CSV 檔案
+          file_name = '00981A_holdings.csv'
+          
+          if not os.path.exists(file_name):
+              print("❌ 找不到 CSV 數據檔，跳過雲端空投。")
+              sys.exit(0)
+
+          try:
+              creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
+              creds = service_account.Credentials.from_service_account_info(creds_json)
+              drive_service = build('drive', 'v3', credentials=creds)
+              folder_id = os.environ['FOLDER_ID']
+
+              # 尋找雲端硬碟中是否已有舊的 CSV
+              query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+              results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+              items = results.get('files', [])
+
+              # 指定上傳格式為 CSV
+              media = MediaFileUpload(file_name, mimetype='text/csv', resumable=True)
+              
+              if items:
+                  file_id = items[0]['id']
+                  drive_service.files().update(fileId=file_id, media_body=media).execute()
+                  print(f"✅ 雲端覆蓋成功: {file_name}")
+              else:
+                  file_metadata = {'name': file_name, 'parents': [folder_id]}
+                  drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                  print(f"✅ 雲端新建成功: {file_name}")
+                  
+          except Exception as e:
+              print(f"❌ 雲端同步崩潰: {e}")
+              sys.exit(1)
+          EOF
