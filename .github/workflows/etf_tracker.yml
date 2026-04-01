@@ -28,8 +28,7 @@ jobs:
           pip install requests pandas lxml html5lib
 
       - name: Run ETF Tracker Script
-        env:
-          LINE_TOKEN: ${{ secrets.LINE_TOKEN }}
+       
         run: python etf_00981A_tracker.py
 
       - name: Commit and push CSV database
