@@ -26,7 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           # 補上 beautifulsoup4 確保 pandas 的 read_html 能順利執行
-          pip install requests pandas lxml html5lib beautifulsoup
+          pip install requests pandas lxml html5lib beautifulsoup4
 
       - name: Run ETF Tracker Script
        
