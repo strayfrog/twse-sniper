@@ -13,10 +13,8 @@ jobs:
   track-etf:
     runs-on: ubuntu-latest
     steps:
-      # 升級到 v4 (解決黃色警告)
       - uses: actions/checkout@v4
 
-      # 升級到 v5 (解決黃色警告)
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -25,11 +23,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # 補上 beautifulsoup4 確保 pandas 的 read_html 能順利執行
-          pip install requests pandas lxml html5lib beautifulsoup4
+          # 補上所有必要的戰略套件，包含 Google Drive 通訊所需的庫
+          pip install requests pandas lxml html5lib beautifulsoup4 google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
       - name: Run ETF Tracker Script
-       
         run: python etf_00981A_tracker.py
 
       - name: Commit and push CSV database
@@ -37,15 +34,13 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add 00981A_holdings.csv
-          # 如果沒有變動就不 commit，有變動才 commit 並 push
+          # 檢查是否有變動，有變動才提交
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 自動更新 00981A 籌碼歷史資料" && git push)
 
-          - name: 🚀 最終階段：CSV 籌碼情報雲端空投
+      - name: 🚀 最終階段：CSV 籌碼情報雲端空投
         env:
-          # 延用您原本設定好的 Secret 密鑰
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
-          # 請確認這是您要存放 00981A 情報的資料夾 ID
-          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi" 
+          FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
         run: |
           python - << 'EOF'
           import os, json, sys
@@ -53,7 +48,6 @@ jobs:
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
 
-          # 🎯 目標改為 00981A 的 CSV 檔案
           file_name = '00981A_holdings.csv'
           
           if not os.path.exists(file_name):
@@ -66,12 +60,11 @@ jobs:
               drive_service = build('drive', 'v3', credentials=creds)
               folder_id = os.environ['FOLDER_ID']
 
-              # 尋找雲端硬碟中是否已有舊的 CSV
+              # 尋找雲端硬碟中是否已有同名檔案
               query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
               results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
               items = results.get('files', [])
 
-              # 指定上傳格式為 CSV
               media = MediaFileUpload(file_name, mimetype='text/csv', resumable=True)
               
               if items:
