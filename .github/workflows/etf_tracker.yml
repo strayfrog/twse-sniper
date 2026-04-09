@@ -32,9 +32,7 @@ jobs:
         with:
           chrome-version: stable
           
-      - name: Run ETF Tracker Script
-        run: python etf_00981A_tracker.py
-
+  
       - name: Run ETF Tracker Script
         run: python etf_00981A_tracker.py
 
