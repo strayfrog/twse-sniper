@@ -9,11 +9,11 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 def main():
-    # 🎯 V4.1 終極裝甲版：直攻口袋證券，精準鎖定欄位
+    # 🎯 V4.2 終極裝甲版：直攻口袋證券，並配備「雜訊粉碎防護罩」
     POCKET_URL = "https://www.pocket.tw/etf/tw/00981A/fundholding/"
     csv_file = "00981A_holdings.csv"
     today_str = datetime.now().strftime('%Y-%m-%d')
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 啟動【無頭裝甲車 V4.1】偵察任務...")
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 啟動【無頭裝甲車 V4.2】偵察任務...")
 
     try:
         # 1. 啟動隱形裝甲車
@@ -50,7 +50,7 @@ def main():
         if target_df is None:
             raise ValueError("❌ 找不到表格！網頁結構可能發生變動。")
 
-        print(f"✅ 成功擊破空殼陷阱，接收到 {len(target_df)} 筆真實數據。")
+        print(f"✅ 成功擊破空殼陷阱，接收到 {len(target_df)} 筆原始數據。")
         print(f"🔍 戰術雷達掃描到的欄位名稱為: {list(target_df.columns)}") # 除錯雷達
 
         # 5. 數據萃取與清理 (加入 '持有' 關鍵字防呆)
@@ -70,8 +70,20 @@ def main():
         df_today['股數'] = pd.to_numeric(target_df[shares_col].astype(str).str.replace(',', ''), errors='coerce')
         df_today['權重'] = pd.to_numeric(target_df[weight_col].astype(str).str.replace('%', ''), errors='coerce')
         
-        df_today = df_today.dropna(subset=['代號', '權重'])
-        print(f"📊 成功過濾！今日有效持股共 {len(df_today)} 檔。")
+        # ==========================================
+        # 🛡️ 啟動雜訊過濾防護罩 (V4.2 新增核心)
+        # ==========================================
+        # 1. 踢除名稱裡包含「現金」、「元」、「價金」、「淨值」、「差異」的列
+        df_today = df_today[~df_today['名稱'].str.contains('現金|元|價金|淨值|差異|合計', na=False)]
+        
+        # 2. 踢除代號欄位出現奇怪字眼的列 (例如 NTD)
+        df_today = df_today[~df_today['代號'].str.contains('NTD|合計', na=False)]
+        
+        # 3. 清除轉換失敗的空值，確保代號、權重、股數都必須存在
+        df_today = df_today.dropna(subset=['代號', '權重', '股數'])
+        # ==========================================
+
+        print(f"📊 成功過濾雜訊！今日有效「純股票」持股共 {len(df_today)} 檔。")
 
         # 6. 歷史檔案無縫疊加
         if os.path.exists(csv_file):
@@ -86,7 +98,7 @@ def main():
         # 7. 寫回 CSV
         df_final = df_final[['日期', '代號', '名稱', '權重', '股數']]
         df_final.to_csv(csv_file, index=False, encoding='utf-8-sig')
-        print(f"\n💾 終極破防成功！包含【真實張數】的數據已寫入：{csv_file}")
+        print(f"\n💾 終極破防成功！純淨數據已寫入：{csv_file}")
 
     except Exception as e:
         print(f"\n❌ 裝甲車偵察發生故障：{str(e)}")
