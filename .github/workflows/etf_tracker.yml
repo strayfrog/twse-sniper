@@ -23,8 +23,17 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # 補上所有必要的戰略套件，包含 Google Drive 通訊所需的庫
-          pip install requests pandas lxml html5lib beautifulsoup4 google-api-python-client google-auth-httplib2 google-auth-oauthlib
+          # 補上 Selenium 與 Webdriver-Manager 裝備
+          pip install requests pandas lxml html5lib beautifulsoup4 selenium webdriver-manager google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+      # 【新增的裝甲車引擎區塊】
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+          
+      - name: Run ETF Tracker Script
+        run: python etf_00981A_tracker.py
 
       - name: Run ETF Tracker Script
         run: python etf_00981A_tracker.py
