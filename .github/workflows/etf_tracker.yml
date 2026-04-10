@@ -32,6 +32,12 @@ jobs:
         with:
           chrome-version: stable
           
+      - name: Run ETF Tracker Script
+        run: python etf_00981A_tracker.py
+
+      - name: Commit and push CSV database
+        run: |
+          echo "==== 戰區檔案盤點清單 ===="    
   
       - name: Commit and push CSV database
         run: |
