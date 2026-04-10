@@ -33,16 +33,14 @@ jobs:
           chrome-version: stable
           
   
-      - name: Run ETF Tracker Script
-        run: python etf_00981A_tracker.py
-
       - name: Commit and push CSV database
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add 00981A_holdings.csv
+          # 🚨 關鍵修改 1：使用萬用字元 (*)，把所有 _holdings.csv 結尾的檔案全部抓上車
+          git add *_holdings.csv
           # 檢查是否有變動，有變動才提交
-          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 自動更新 00981A 籌碼歷史資料" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 自動更新四大主動 ETF 籌碼歷史資料" && git push)
 
       - name: 🚀 最終階段：CSV 籌碼情報雲端空投
         env:
@@ -50,16 +48,10 @@ jobs:
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
         run: |
           python - << 'EOF'
-          import os, json, sys
+          import os, json, sys, glob
           from google.oauth2 import service_account
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
-
-          file_name = '00981A_holdings.csv'
-          
-          if not os.path.exists(file_name):
-              print("❌ 找不到 CSV 數據檔，跳過雲端空投。")
-              sys.exit(0)
 
           try:
               creds_json = json.loads(os.environ['GDRIVE_CREDENTIALS'])
@@ -67,22 +59,33 @@ jobs:
               drive_service = build('drive', 'v3', credentials=creds)
               folder_id = os.environ['FOLDER_ID']
 
-              # 尋找雲端硬碟中是否已有同名檔案
-              query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
-              results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
-              items = results.get('files', [])
-
-              media = MediaFileUpload(file_name, mimetype='text/csv', resumable=True)
+              # 🚨 關鍵修改 2：使用 glob 模組，自動搜尋目錄下所有 CSV 檔案
+              csv_files = glob.glob('*_holdings.csv')
               
-              if items:
-                  file_id = items[0]['id']
-                  drive_service.files().update(fileId=file_id, media_body=media).execute()
-                  print(f"✅ 雲端覆蓋成功: {file_name}")
-              else:
-                  file_metadata = {'name': file_name, 'parents': [folder_id]}
-                  drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                  print(f"✅ 雲端新建成功: {file_name}")
+              if not csv_files:
+                  print("❌ 找不到任何 CSV 數據檔，跳過雲端空投。")
+                  sys.exit(0)
+
+              # 🚨 關鍵修改 3：啟動迴圈，把找到的 4 個檔案一個一個空投上去
+              for file_name in csv_files:
+                  print(f"📦 準備空投: {file_name}")
                   
+                  # 尋找雲端硬碟中是否已有同名檔案
+                  query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+                  results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
+                  items = results.get('files', [])
+
+                  media = MediaFileUpload(file_name, mimetype='text/csv', resumable=True)
+                  
+                  if items:
+                      file_id = items[0]['id']
+                      drive_service.files().update(fileId=file_id, media_body=media).execute()
+                      print(f"✅ 雲端覆蓋成功: {file_name}")
+                  else:
+                      file_metadata = {'name': file_name, 'parents': [folder_id]}
+                      drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+                      print(f"✅ 雲端新建成功: {file_name}")
+                      
           except Exception as e:
               print(f"❌ 雲端同步崩潰: {e}")
               sys.exit(1)
