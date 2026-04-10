@@ -35,11 +35,16 @@ jobs:
   
       - name: Commit and push CSV database
         run: |
+          # 🔦 探照燈：印出目前目錄下所有 CSV 檔案，看 Python 到底有沒有生出來！
+          echo "==== 戰區檔案盤點清單 ===="
+          ls -la *_holdings.csv || echo "沒有找到任何 CSV"
+          echo "========================"
+          
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          # 🚨 關鍵修改 1：使用萬用字元 (*)，把所有 _holdings.csv 結尾的檔案全部抓上車
-          git add *_holdings.csv
-          # 檢查是否有變動，有變動才提交
+          # 🚨 升級無死角抓取：加上引號讓 git 自己去比對所有檔案
+          git add "*_holdings.csv"
+          
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 自動更新四大主動 ETF 籌碼歷史資料" && git push)
 
       - name: 🚀 最終階段：CSV 籌碼情報雲端空投
