@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 6967.38,
+            "Price": 7022.95,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 23639.08,
+            "Price": 24016.02,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 48535.99,
+            "Price": 48463.72,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 9224.12,
+            "Price": 9239.29,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,47 +113,47 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 196.51,
+            "Price": 198.87,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 465.66,
+            "Price": 456.23,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 222.4,
+            "Price": 213.8,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 29.53,
+            "Price": 33.36,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 45.48,
+            "Price": 45.03,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 148.09,
+            "Price": 148.62,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 87.21,
+            "Price": 86.83,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 449.7,
+            "Price": 455.57,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
-        "自營商(自行買賣)": "-48.07 億",
+        "自營商(自行買賣)": "-44.47 億",
         "自營商(避險)": "-5.85 億",
-        "投信": "-91.26 億",
-        "外資及陸資(不含外資自營商)": "557.1 億",
+        "投信": "-88.94 億",
+        "外資及陸資(不含外資自營商)": "553.5 億",
         "外資自營商": "0.0 億",
-        "合計": "411.93 億"
+        "合計": "414.25 億"
     },
     "metadata": {
-        "UpdateTime": "2026-04-15 16:58:32"
+        "UpdateTime": "2026-04-16 08:01:56"
     }
 }
