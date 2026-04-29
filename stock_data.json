@@ -146,14 +146,9 @@
         }
     },
     "institutional_investors": {
-        "自營商(自行買賣)": "-17.33 億",
-        "自營商(避險)": "1.34 億",
-        "投信": "22.33 億",
-        "外資及陸資(不含外資自營商)": "-481.47 億",
-        "外資自營商": "0.0 億",
-        "合計": "-475.14 億"
+        "status": "抓取失敗: HTTPSConnectionPool(host='www.twse.com.tw', port=443): Read timed out. (read timeout=15)"
     },
     "metadata": {
-        "UpdateTime": "2026-04-29 16:30:30"
+        "UpdateTime": "2026-04-29 17:30:13"
     }
 }
