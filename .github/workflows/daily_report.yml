@@ -89,7 +89,7 @@ jobs:
             git push origin main
           fi
 
-      - name: 🚀 第二階段：JSON 雲端空投 (覆蓋 / 新建 Google Drive)
+      - name: 🚀 第二階段：JSON 雲端空投 (強制轉為 Google Docs 解決 AI 盲區)
         env:
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
           FOLDER_ID: "19HiW-LLh1KQK7IOlxJCPfwkrKmDdXDWi"
@@ -100,8 +100,12 @@ jobs:
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
 
-          file_name = 'stock_data.json'
-          if not os.path.exists(file_name):
+          # 本地端依然是您的 JSON 檔
+          local_file = 'stock_data.json'
+          # 雲端上的名字改為無副檔名，避免 AI 混淆
+          doc_name = 'stock_data_report' 
+
+          if not os.path.exists(local_file):
               print("❌ 找不到數據檔，跳過雲端空投。")
               sys.exit(0)
 
@@ -111,20 +115,30 @@ jobs:
               drive_service = build('drive', 'v3', credentials=creds)
               folder_id = os.environ['FOLDER_ID']
 
-              query = f"name = '{file_name}' and '{folder_id}' in parents and trashed = false"
+              # 尋找名為 stock_data_report 的檔案
+              query = f"name = '{doc_name}' and '{folder_id}' in parents and trashed = false"
               results = drive_service.files().list(q=query, spaces='drive', fields='files(id)').execute()
               items = results.get('files', [])
 
-              media = MediaFileUpload(file_name, resumable=True)
+              # 告訴 API 上傳的內容是純文字
+              media = MediaFileUpload(local_file, mimetype='text/plain', resumable=True)
+
               if items:
                   file_id = items[0]['id']
                   drive_service.files().update(fileId=file_id, media_body=media).execute()
-                  print(f"✅ 雲端覆蓋成功: {file_name}")
+                  print(f"✅ 雲端文件更新成功: {doc_name}")
               else:
-                  print(f"⚠️ 找不到舊檔，建立新檔: {file_name}")
-                  file_metadata = {'name': file_name, 'parents': [folder_id]}
+                  print(f"⚠️ 找不到舊檔，建立新文件: {doc_name}")
+                  
+                  # 【終極防盲解法在此】
+                  # mimeType 設定為 Google Docs，檔案上傳後會自動被轉換成 Google 官方文件格式
+                  file_metadata = {
+                      'name': doc_name,
+                      'parents': [folder_id],
+                      'mimeType': 'application/vnd.google-apps.document' 
+                  }
                   drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-                  print(f"✅ 雲端新建成功: {file_name}")
+                  print(f"✅ 雲端文件新建成功: {doc_name}")
           except Exception as e:
               print(f"❌ 雲端同步崩潰: {e}")
               sys.exit(1)
