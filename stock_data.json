@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7138.8,
+            "Price": 7135.95,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 24663.8,
+            "Price": 24673.24,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 49141.93,
+            "Price": 48861.81,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 10035.58,
+            "Price": 10271.3,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,42 +113,46 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 213.17,
+            "Price": 209.25,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 504.29,
+            "Price": 518.46,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 257.27,
+            "Price": 271.95,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 32.86,
+            "Price": 30.48,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 47.24,
+            "Price": 46.61,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 149.46,
+            "Price": 148.94,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 86.37,
+            "Price": 85.7,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 77.62,
+            "Price": 77.43,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
-        "status": "抓取失敗: HTTPSConnectionPool(host='www.twse.com.tw', port=443): Read timed out. (read timeout=15)"
+        "自營商(自行買賣)": "-17.33 億",
+        "自營商(避險)": "1.34 億",
+        "投信": "21.28 億",
+        "外資": "-481.47 億",
+        "合計": "-476.18 億"
     },
     "metadata": {
-        "UpdateTime": "2026-04-29 17:30:13"
+        "UpdateTime": "2026-04-30 08:10:29"
     }
 }
