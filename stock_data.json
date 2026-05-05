@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7230.12,
+            "Price": 7200.75,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 25114.44,
+            "Price": 25067.8,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 49499.27,
+            "Price": 48941.9,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 10595.34,
+            "Price": 10534.66,
             "Currency": "PTS"
         },
         "0050": {
@@ -29,7 +29,7 @@
             "Currency": "TWD"
         },
         "00713": {
-            "Price": 53.05,
+            "Price": 53.34,
             "Currency": "TWD"
         },
         "00878": {
@@ -113,47 +113,47 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 198.45,
+            "Price": 198.48,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 542.21,
+            "Price": 576.45,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 295.79,
+            "Price": 333.96,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 32.74,
+            "Price": 32.08,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 48.11,
+            "Price": 47.57,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 151.44,
+            "Price": 150.56,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 85.61,
+            "Price": 84.96,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 78.46,
+            "Price": 78.36,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "14.27 億",
         "自營商(避險)": "75.14 億",
-        "投信": "21.18 億",
+        "投信": "20.28 億",
         "外資及陸資(不含外資自營商)": "669.76 億",
         "外資自營商": "0.0 億",
-        "合計": "780.34 億"
+        "合計": "779.45 億"
     },
     "metadata": {
-        "UpdateTime": "2026-05-04 17:34:15"
+        "UpdateTime": "2026-05-05 08:10:07"
     }
 }
