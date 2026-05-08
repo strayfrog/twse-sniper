@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7365.12,
+            "Price": 7337.11,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 25838.94,
+            "Price": 25806.2,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 49910.59,
+            "Price": 49596.97,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 11472.75,
+            "Price": 11160.99,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,47 +113,47 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 207.83,
+            "Price": 211.5,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 666.59,
+            "Price": 646.63,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 440.24,
+            "Price": 414.68,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 28.7,
+            "Price": 29.0,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 47.44,
+            "Price": 47.09,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 155.06,
+            "Price": 153.72,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 86.08,
+            "Price": 85.65,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 80.73,
+            "Price": 80.6,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "14.03 億",
-        "自營商(避險)": "-55.46 億",
-        "投信": "160.62 億",
+        "自營商(避險)": "-55.45 億",
+        "投信": "150.52 億",
         "外資及陸資(不含外資自營商)": "464.12 億",
         "外資自營商": "0.0 億",
-        "合計": "583.31 億"
+        "合計": "573.22 億"
     },
     "metadata": {
-        "UpdateTime": "2026-05-07 17:59:17"
+        "UpdateTime": "2026-05-08 08:07:34"
     }
 }
