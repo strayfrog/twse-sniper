@@ -1,7 +1,7 @@
 {
     "stocks": {
         "^TWII": {
-            "Price": 41603.94,
+            "Price": 41790.06,
             "Currency": "PTS"
         },
         "^GSPC": {
@@ -21,63 +21,63 @@
             "Currency": "PTS"
         },
         "0050": {
-            "Price": 97.0,
+            "Price": 96.9,
             "Currency": "TWD"
         },
         "0056": {
-            "Price": 44.85,
+            "Price": 45.76,
             "Currency": "TWD"
         },
         "00713": {
-            "Price": 54.75,
+            "Price": 55.2,
             "Currency": "TWD"
         },
         "00878": {
-            "Price": 27.82,
+            "Price": 28.28,
             "Currency": "TWD"
         },
         "00915": {
-            "Price": 26.49,
+            "Price": 26.67,
             "Currency": "TWD"
         },
         "00919": {
-            "Price": 25.47,
+            "Price": 25.75,
             "Currency": "TWD"
         },
         "00939": {
-            "Price": 18.08,
+            "Price": 18.15,
             "Currency": "TWD"
         },
         "00940": {
-            "Price": 11.15,
+            "Price": 11.31,
             "Currency": "TWD"
         },
         "00712": {
-            "Price": 9.03,
+            "Price": 9.02,
             "Currency": "TWD"
         },
         "2330": {
-            "Price": 2290.0,
+            "Price": 2235.0,
             "Currency": "TWD"
         },
         "2412": {
-            "Price": 136.5,
+            "Price": 135.5,
             "Currency": "TWD"
         },
         "2542": {
-            "Price": 40.0,
+            "Price": 41.65,
             "Currency": "TWD"
         },
         "4306": {
-            "Price": 13.15,
+            "Price": 13.35,
             "Currency": "TWD"
         },
         "2801": {
-            "Price": 20.95,
+            "Price": 20.9,
             "Currency": "TWD"
         },
         "2834": {
-            "Price": 16.25,
+            "Price": 16.15,
             "Currency": "TWD"
         },
         "2845": {
@@ -85,11 +85,11 @@
             "Currency": "TWD"
         },
         "2882": {
-            "Price": 80.0,
+            "Price": 78.4,
             "Currency": "TWD"
         },
         "2883": {
-            "Price": 22.9,
+            "Price": 22.8,
             "Currency": "TWD"
         },
         "2885": {
@@ -97,15 +97,15 @@
             "Currency": "TWD"
         },
         "2887": {
-            "Price": 23.8,
+            "Price": 23.45,
             "Currency": "TWD"
         },
         "2890": {
-            "Price": 31.0,
+            "Price": 30.6,
             "Currency": "TWD"
         },
         "6005": {
-            "Price": 30.55,
+            "Price": 32.25,
             "Currency": "TWD"
         },
         "6024": {
@@ -146,14 +146,14 @@
         }
     },
     "institutional_investors": {
-        "自營商(自行買賣)": "-26.19 億",
-        "自營商(避險)": "-74.18 億",
-        "投信": "19.57 億",
-        "外資及陸資(不含外資自營商)": "-120.85 億",
+        "自營商(自行買賣)": "7.9 億",
+        "自營商(避險)": "29.4 億",
+        "投信": "121.88 億",
+        "外資及陸資(不含外資自營商)": "-109.84 億",
         "外資自營商": "0.0 億",
-        "合計": "-201.64 億"
+        "合計": "49.34 億"
     },
     "metadata": {
-        "UpdateTime": "2026-05-11 08:10:59"
+        "UpdateTime": "2026-05-11 15:58:06"
     }
 }
