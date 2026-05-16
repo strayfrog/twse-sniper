@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7501.24,
+            "Price": 7408.5,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 26635.22,
+            "Price": 26225.14,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 50063.46,
+            "Price": 49526.17,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 12073.78,
+            "Price": 11588.46,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,47 +113,47 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 235.74,
+            "Price": 225.32,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 776.01,
+            "Price": 724.66,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 579.52,
+            "Price": 503.69,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 29.71,
+            "Price": 29.51,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 47.06,
+            "Price": 46.37,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 156.02,
+            "Price": 153.52,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 84.92,
+            "Price": 83.66,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 83.49,
+            "Price": 82.19,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "-52.95 億",
-        "自營商(避險)": "-196.49 億",
-        "投信": "-13.49 億",
-        "外資及陸資(不含外資自營商)": "-103.68 億",
+        "自營商(避險)": "-196.48 億",
+        "投信": "-13.67 億",
+        "外資及陸資(不含外資自營商)": "-104.27 億",
         "外資自營商": "0.0 億",
-        "合計": "-366.61 億"
+        "合計": "-367.37 億"
     },
     "metadata": {
-        "UpdateTime": "2026-05-15 18:00:14"
+        "UpdateTime": "2026-05-16 08:10:01"
     }
 }
