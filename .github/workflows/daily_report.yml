@@ -2,7 +2,7 @@ name: Global Tactical Intelligence (Data Fetch Only)
 
 on:
   schedule:
-# 1. 美股收盤情報：改在 UTC 23:17 (台灣時間 07:17)
+# 1. 美股收盤情報：改在 UTC 22:17 (台灣時間 06:17)
     # 避開 UTC 23:00 的大排隊，增加準點率
     - cron: '17 23 * * *'
     
