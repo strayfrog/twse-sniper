@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7383.74,
+            "Price": 7405.73,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 25709.43,
+            "Price": 25929.66,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 50866.78,
+            "Price": 50786.01,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 12220.76,
+            "Price": 12906.69,
             "Currency": "PTS"
         },
         "0050": {
@@ -29,7 +29,7 @@
             "Currency": "TWD"
         },
         "00713": {
-            "Price": 57.65,
+            "Price": 57.89,
             "Currency": "TWD"
         },
         "00878": {
@@ -49,7 +49,7 @@
             "Currency": "TWD"
         },
         "00940": {
-            "Price": 11.99,
+            "Price": 12.05,
             "Currency": "TWD"
         },
         "00712": {
@@ -113,39 +113,39 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 205.1,
+            "Price": 208.64,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 864.01,
+            "Price": 949.28,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 661.33,
+            "Price": 789.87,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 29.74,
+            "Price": 31.0,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 45.37,
+            "Price": 45.44,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 153.68,
+            "Price": 154.48,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 85.06,
+            "Price": 84.62,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 80.94,
+            "Price": 81.47,
             "Currency": "USD"
         },
         "DRAM": {
-            "Price": 55.79,
+            "Price": 60.52,
             "Currency": "USD"
         }
     },
@@ -158,6 +158,6 @@
         "合計": "-1342.23 億"
     },
     "metadata": {
-        "UpdateTime": "2026-06-08 20:12:03"
+        "UpdateTime": "2026-06-09 08:17:01"
     }
 }
