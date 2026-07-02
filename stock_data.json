@@ -1,27 +1,27 @@
 {
     "stocks": {
         "^TWII": {
-            "Price": 47018.99,
+            "Price": 46074.98,
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7499.36,
+            "Price": 7483.23,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 26213.72,
+            "Price": 26040.03,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 52319.2,
+            "Price": 52305.24,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 14246.96,
+            "Price": 13353.28,
             "Currency": "PTS"
         },
         "0050": {
-            "Price": 109.35,
+            "Price": 107.1,
             "Currency": "TWD"
         },
         "0056": {
@@ -37,7 +37,7 @@
             "Currency": "TWD"
         },
         "00915": {
-            "Price": 32.32,
+            "Price": 32.08,
             "Currency": "TWD"
         },
         "00919": {
@@ -53,19 +53,19 @@
             "Currency": "TWD"
         },
         "00712": {
-            "Price": 8.8,
+            "Price": 8.74,
             "Currency": "TWD"
         },
         "2330": {
-            "Price": 2505.0,
+            "Price": 2450.0,
             "Currency": "TWD"
         },
         "2412": {
-            "Price": 141.5,
+            "Price": 141.0,
             "Currency": "TWD"
         },
         "2542": {
-            "Price": 42.35,
+            "Price": 42.25,
             "Currency": "TWD"
         },
         "4306": {
@@ -73,91 +73,91 @@
             "Currency": "TWD"
         },
         "2801": {
-            "Price": 23.85,
+            "Price": 23.65,
             "Currency": "TWD"
         },
         "2834": {
-            "Price": 17.6,
+            "Price": 17.55,
             "Currency": "TWD"
         },
         "2845": {
-            "Price": 13.0,
+            "Price": 12.95,
             "Currency": "TWD"
         },
         "2882": {
-            "Price": 95.0,
+            "Price": 94.8,
             "Currency": "TWD"
         },
         "2883": {
-            "Price": 28.3,
+            "Price": 28.1,
             "Currency": "TWD"
         },
         "2885": {
-            "Price": 66.0,
+            "Price": 65.2,
             "Currency": "TWD"
         },
         "2887": {
-            "Price": 33.35,
+            "Price": 33.15,
             "Currency": "TWD"
         },
         "2890": {
-            "Price": 40.0,
+            "Price": 39.3,
             "Currency": "TWD"
         },
         "6005": {
-            "Price": 37.65,
+            "Price": 37.25,
             "Currency": "TWD"
         },
         "6024": {
-            "Price": 61.7,
+            "Price": 61.6,
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 200.09,
+            "Price": 197.58,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 1154.29,
+            "Price": 1032.28,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 1048.73,
+            "Price": 850.01,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 35.43,
+            "Price": 35.74,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 42.34,
+            "Price": 41.99,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 156.95,
+            "Price": 156.12,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 86.42,
+            "Price": 85.52,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 82.62,
+            "Price": 82.24,
             "Currency": "USD"
         },
         "DRAM": {
-            "Price": 73.85,
+            "Price": 65.86,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "-1.73 億",
         "自營商(避險)": "61.11 億",
-        "投信": "146.21 億",
+        "投信": "156.03 億",
         "外資及陸資(不含外資自營商)": "323.76 億",
         "外資自營商": "0.0 億",
-        "合計": "529.36 億"
+        "合計": "539.17 億"
     },
     "metadata": {
-        "UpdateTime": "2026-07-01 18:50:58"
+        "UpdateTime": "2026-07-02 09:21:48"
     }
 }
