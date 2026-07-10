@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7482.71,
+            "Price": 7543.64,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 25870.65,
+            "Price": 26206.89,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 52348.39,
+            "Price": 52487.41,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 12574.97,
+            "Price": 12960.0,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,51 +113,51 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 204.12,
+            "Price": 202.78,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 948.8,
+            "Price": 991.64,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 703.05,
+            "Price": 764.63,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 31.81,
+            "Price": 33.23,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 42.45,
+            "Price": 42.24,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 155.81,
+            "Price": 157.0,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 84.36,
+            "Price": 84.49,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 81.89,
+            "Price": 82.81,
             "Currency": "USD"
         },
         "DRAM": {
-            "Price": 62.04,
+            "Price": 64.36,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "-20.36 億",
         "自營商(避險)": "-56.35 億",
-        "投信": "154.1 億",
-        "外資及陸資(不含外資自營商)": "-471.33 億",
+        "投信": "199.01 億",
+        "外資及陸資(不含外資自營商)": "-472.53 億",
         "外資自營商": "0.0 億",
-        "合計": "-393.94 億"
+        "合計": "-350.23 億"
     },
     "metadata": {
-        "UpdateTime": "2026-07-09 18:36:35"
+        "UpdateTime": "2026-07-10 09:01:44"
     }
 }
