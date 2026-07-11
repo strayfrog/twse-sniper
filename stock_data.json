@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7543.64,
+            "Price": 7575.39,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 26206.89,
+            "Price": 26281.61,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 52487.41,
+            "Price": 52637.01,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 12960.0,
+            "Price": 12967.16,
             "Currency": "PTS"
         },
         "0050": {
@@ -113,39 +113,39 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 202.78,
+            "Price": 210.96,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 991.64,
+            "Price": 979.3,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 764.63,
+            "Price": 745.39,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 33.23,
+            "Price": 32.74,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 42.24,
+            "Price": 42.12,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 157.0,
+            "Price": 157.63,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 84.49,
+            "Price": 84.47,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 82.81,
+            "Price": 83.31,
             "Currency": "USD"
         },
         "DRAM": {
-            "Price": 64.36,
+            "Price": 63.04,
             "Currency": "USD"
         }
     },
@@ -158,6 +158,6 @@
         "合計": "-350.23 億"
     },
     "metadata": {
-        "UpdateTime": "2026-07-10 18:30:55"
+        "UpdateTime": "2026-07-11 08:12:31"
     }
 }
