@@ -5,19 +5,19 @@
             "Currency": "PTS"
         },
         "^GSPC": {
-            "Price": 7515.34,
+            "Price": 7543.59,
             "Currency": "PTS"
         },
         "^IXIC": {
-            "Price": 25873.18,
+            "Price": 26107.01,
             "Currency": "PTS"
         },
         "^DJI": {
-            "Price": 52498.64,
+            "Price": 52508.27,
             "Currency": "PTS"
         },
         "^SOX": {
-            "Price": 12347.78,
+            "Price": 12661.93,
             "Currency": "PTS"
         },
         "0050": {
@@ -50,10 +50,6 @@
         },
         "00940": {
             "Price": 12.15,
-            "Currency": "TWD"
-        },
-        "00712": {
-            "Price": 8.8,
             "Currency": "TWD"
         },
         "2330": {
@@ -113,51 +109,51 @@
             "Currency": "TWD"
         },
         "NVDA": {
-            "Price": 203.53,
+            "Price": 211.8,
             "Currency": "USD"
         },
         "MU": {
-            "Price": 937.0,
+            "Price": 983.12,
             "Currency": "USD"
         },
         "MUU": {
-            "Price": 678.2,
+            "Price": 742.65,
             "Currency": "USD"
         },
         "UPST": {
-            "Price": 31.46,
+            "Price": 31.72,
             "Currency": "USD"
         },
         "VZ": {
-            "Price": 42.68,
+            "Price": 42.47,
             "Currency": "USD"
         },
         "VT": {
-            "Price": 155.81,
+            "Price": 156.78,
             "Currency": "USD"
         },
         "TLT": {
-            "Price": 83.97,
+            "Price": 84.08,
             "Currency": "USD"
         },
         "VOOG": {
-            "Price": 82.02,
+            "Price": 82.88,
             "Currency": "USD"
         },
         "DRAM": {
-            "Price": 57.3,
+            "Price": 61.23,
             "Currency": "USD"
         }
     },
     "institutional_investors": {
         "自營商(自行買賣)": "-13.06 億",
         "自營商(避險)": "-369.85 億",
-        "投信": "148.24 億",
+        "投信": "110.02 億",
         "外資及陸資(不含外資自營商)": "-518.93 億",
         "外資自營商": "0.0 億",
-        "合計": "-753.6 億"
+        "合計": "-791.82 億"
     },
     "metadata": {
-        "UpdateTime": "2026-07-14 17:20:31"
+        "UpdateTime": "2026-07-15 08:08:10"
     }
 }
